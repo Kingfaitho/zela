@@ -12,7 +12,7 @@ zela = "G7BsDNn5y6h1dFngYtf1xNpg7btMFjmT24R6jWENK1yB"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
