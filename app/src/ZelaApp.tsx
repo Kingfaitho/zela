@@ -237,6 +237,66 @@ export default function ZelaApp() {
                   </div>
                   {withdrawAmount && <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginTop: 8 }}>≈ ₦{(parseFloat(withdrawAmount || "0") * ngnRate).toLocaleString()}</p>}
                 </div>
+
+                {/* Send USDC */}
+                <div style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: 16,
+                  padding: 20,
+                  marginBottom: 16,
+                }}>
+                  <p style={{ fontWeight: 600, marginBottom: 12, fontSize: 15 }}>Send USDC</p>
+                  <input
+                    type="text"
+                    placeholder="Recipient wallet address"
+                    id="recipient-address"
+                    style={{
+                      width: "100%",
+                      padding: "12px 14px",
+                      background: "rgba(255,255,255,0.08)",
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      borderRadius: 10,
+                      color: "white",
+                      fontSize: 14,
+                      outline: "none",
+                      marginBottom: 10,
+                      boxSizing: "border-box",
+                    }}
+                  />
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <input
+                      type="number"
+                      placeholder="Amount USDC"
+                      id="send-amount"
+                      style={{
+                        flex: 1,
+                        padding: "12px 14px",
+                        background: "rgba(255,255,255,0.08)",
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        borderRadius: 10,
+                        color: "white",
+                        fontSize: 15,
+                        outline: "none",
+                      }}
+                    />
+                    <button
+                      disabled={loading}
+                      style={{
+                        padding: "12px 20px",
+                        background: "linear-gradient(135deg, #00d4aa, #7c3aed)",
+                        border: "none",
+                        borderRadius: 10,
+                        color: "white",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        fontSize: 15,
+                      }}
+                    >
+                      Send
+                    </button>
+                  </div>
+                </div>
               </>
             )}
 

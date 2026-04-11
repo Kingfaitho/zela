@@ -90,6 +90,46 @@ pub mod zela {
         msg!("Total withdrawn: {}", vault.total_withdrawn);
         Ok(())
     }
+
+    pub fn transfer_usdc(ctx: Context<TransferUsdc>, amount: u64) -> Result<()> {
+        require!(amount > 0, ZelaError::AmountMustBeGreaterThanZero);
+        require!(
+            ctx.accounts.sender_vault_token_account.amount >= amount,
+            ZelaError::InsufficientFunds
+        );
+
+        let owner_key = ctx.accounts.sender.key();
+        let mint_key = ctx.accounts.mint.key();
+        let bump = ctx.accounts.sender_vault.bump;
+        let seeds = &[
+            b"vault",
+            owner_key.as_ref(),
+            mint_key.as_ref(),
+            &[bump],
+        ];
+        let signer_seeds = &[&seeds[..]];
+
+        transfer_checked(
+            CpiContext::new_with_signer(
+                ctx.accounts.token_program.to_account_info(),
+                TransferChecked {
+                    from: ctx.accounts.sender_vault_token_account.to_account_info(),
+                    mint: ctx.accounts.mint.to_account_info(),
+                    to: ctx.accounts.recipient_token_account.to_account_info(),
+                    authority: ctx.accounts.sender_vault.to_account_info(),
+                },
+                signer_seeds,
+            ),
+            amount,
+            ctx.accounts.mint.decimals,
+        )?;
+
+        ctx.accounts.sender_vault.total_withdrawn += amount;
+
+        msg!("Transferred {} USDC to {}", amount, ctx.accounts.recipient.key());
+        Ok(())
+    }
+
 }
 
 #[derive(Accounts)]
@@ -168,6 +208,41 @@ pub struct Withdraw<'info> {
         associated_token::token_program = token_program,
     )]
     pub vault_token_account: InterfaceAccount<'info, TokenAccount>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub token_program: Interface<'info, TokenInterface>,
+    pub system_program: Program<'info, System>,
+}
+
+
+#[derive(Accounts)]
+pub struct TransferUsdc<'info> {
+    #[account(mut)]
+    pub sender: Signer<'info>,
+    pub mint: InterfaceAccount<'info, Mint>,
+    #[account(
+        mut,
+        seeds = [b"vault", sender.key().as_ref(), mint.key().as_ref()],
+        bump = sender_vault.bump,
+        has_one = mint,
+    )]
+    pub sender_vault: Account<'info, ZelaVault>,
+    #[account(
+        mut,
+        associated_token::mint = mint,
+        associated_token::authority = sender_vault,
+        associated_token::token_program = token_program,
+    )]
+    pub sender_vault_token_account: InterfaceAccount<'info, TokenAccount>,
+    /// CHECK: recipient wallet address
+    pub recipient: AccountInfo<'info>,
+    #[account(
+        init_if_needed,
+        payer = sender,
+        associated_token::mint = mint,
+        associated_token::authority = recipient,
+        associated_token::token_program = token_program,
+    )]
+    pub recipient_token_account: InterfaceAccount<'info, TokenAccount>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Interface<'info, TokenInterface>,
     pub system_program: Program<'info, System>,
