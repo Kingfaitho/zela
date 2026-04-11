@@ -44,6 +44,12 @@ npm install
 anchor test
 ```
 
+## Live Demo
+
+https://zela-six-theta.vercel.app
+
+Connect your Phantom wallet on devnet and try it yourself.
+
 ## Run the frontend
 
 ```bash
