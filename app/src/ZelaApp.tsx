@@ -24,6 +24,8 @@ export default function ZelaApp() {
   const [totalDeposited, setTotalDeposited] = useState(0);
   const [depositCount, setDepositCount] = useState(0);
   const [usdcBalance, setUsdcBalance] = useState(0);
+  const [recipientAddress, setRecipientAddress] = useState("");
+  const [sendAmount, setSendAmount] = useState("");
 
   const getProgram = useCallback(() => {
     const provider = new AnchorProvider(connection, wallet as any, {});
@@ -158,6 +160,38 @@ export default function ZelaApp() {
     setLoading(false);
   };
 
+
+  const transferUsdc = async () => {
+    if (!wallet.publicKey || !sendAmount || !recipientAddress) return;
+    setLoading(true);
+    setStatus("Sending USDC...");
+    try {
+      const program = getProgram();
+      const vaultPda = getVaultPda();
+      const amount = new BN(parseFloat(sendAmount) * Math.pow(10, USDC_DECIMALS));
+      const senderVaultTokenAccount = await getAssociatedTokenAddress(DEVNET_USDC_MINT, vaultPda!, true);
+      const recipientPubkey = new PublicKey(recipientAddress);
+      const recipientTokenAccount = await getAssociatedTokenAddress(DEVNET_USDC_MINT, recipientPubkey);
+
+      await program.methods.transferUsdc(amount).accounts({
+        sender: wallet.publicKey,
+        mint: DEVNET_USDC_MINT,
+        senderVault: vaultPda,
+        senderVaultTokenAccount,
+        recipient: recipientPubkey,
+        recipientTokenAccount,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: PublicKey.default,
+      }).rpc();
+      setStatus("Sent successfully! No P2P stress. No bad rates.");
+      setSendAmount("");
+      setRecipientAddress("");
+      fetchData();
+    } catch (e: any) { setStatus("Error: " + e.message); }
+    setLoading(false);
+  };
+
   const ngnBalance = (totalDeposited * ngnRate).toLocaleString("en-NG", { style: "currency", currency: "NGN" });
 
   return (
@@ -250,7 +284,8 @@ export default function ZelaApp() {
                   <input
                     type="text"
                     placeholder="Recipient wallet address"
-                    id="recipient-address"
+                    value={recipientAddress}
+                    onChange={e => setRecipientAddress(e.target.value)}
                     style={{
                       width: "100%",
                       padding: "12px 14px",
@@ -268,7 +303,8 @@ export default function ZelaApp() {
                     <input
                       type="number"
                       placeholder="Amount USDC"
-                      id="send-amount"
+                      value={sendAmount}
+                      onChange={e => setSendAmount(e.target.value)}
                       style={{
                         flex: 1,
                         padding: "12px 14px",
@@ -281,6 +317,7 @@ export default function ZelaApp() {
                       }}
                     />
                     <button
+                      onClick={transferUsdc}
                       disabled={loading}
                       style={{
                         padding: "12px 20px",
@@ -293,7 +330,7 @@ export default function ZelaApp() {
                         fontSize: 15,
                       }}
                     >
-                      Send
+                      {loading ? "..." : "Send"}
                     </button>
                   </div>
                 </div>
