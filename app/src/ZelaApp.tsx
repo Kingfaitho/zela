@@ -6,6 +6,7 @@ import { PublicKey } from "@solana/web3.js";
 import { getAccount, getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import idl from "./zela.json";
 import ZelaAI from "./ZelaAI";
+import TransactionHistory from "./TransactionHistory";
 
 const PROGRAM_ID = new PublicKey("G7BsDNn5y6h1dFngYtf1xNpg7btMFjmT24R6jWENK1yB");
 const DEVNET_USDC_MINT = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
@@ -341,6 +342,8 @@ export default function ZelaApp() {
                 </div>
               </>
             )}
+
+            <TransactionHistory />
 
             <ZelaAI ngnRate={ngnRate} usdcBalance={usdcBalance} vaultBalance={totalDeposited} />
 
