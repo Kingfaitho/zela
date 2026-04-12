@@ -6,6 +6,7 @@ import { PublicKey } from "@solana/web3.js";
 import { getAccount, getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import axios from "axios";
 import idl from "./zela.json";
+import ZelaAI from "./ZelaAI";
 
 const PROGRAM_ID = new PublicKey("G7BsDNn5y6h1dFngYtf1xNpg7btMFjmT24R6jWENK1yB");
 const DEVNET_USDC_MINT = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
@@ -44,10 +45,15 @@ export default function ZelaApp() {
 
   const fetchRate = async () => {
     try {
-      const res = await axios.get("https://api.coingecko.com/api/v3/simple/price?ids=usd-coin&vs_currencies=ngn");
-      const rate = res.data["usd-coin"]?.ngn;
-      if (rate) setNgnRate(rate);
-    } catch { setNgnRate(1650); }
+      const res = await fetch(
+        "https://open.er-api.com/v6/latest/USD"
+      );
+      const data = await res.json();
+      const ngnPerUsd = data.rates?.NGN;
+      if (ngnPerUsd) setNgnRate(ngnPerUsd);
+    } catch {
+      setNgnRate(1650);
+    }
   };
 
   const fetchData = useCallback(async () => {
@@ -336,6 +342,8 @@ export default function ZelaApp() {
                 </div>
               </>
             )}
+
+            <ZelaAI ngnRate={ngnRate} usdcBalance={usdcBalance} vaultBalance={totalDeposited} />
 
             {status && (
               <div style={{ padding: "14px 16px", background: status.includes("Error") ? "rgba(255,59,48,0.15)" : "rgba(0,212,170,0.15)", border: `1px solid ${status.includes("Error") ? "rgba(255,59,48,0.3)" : "rgba(0,212,170,0.3)"}`, borderRadius: 12, fontSize: 14, color: status.includes("Error") ? "#ff3b30" : "#00d4aa", marginBottom: 16 }}>
