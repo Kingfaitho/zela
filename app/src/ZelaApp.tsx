@@ -4,7 +4,6 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { Program, AnchorProvider, BN, setProvider } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { getAccount, getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import axios from "axios";
 import idl from "./zela.json";
 import ZelaAI from "./ZelaAI";
 
