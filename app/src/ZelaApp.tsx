@@ -7,6 +7,7 @@ import { getAccount, getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana
 import idl from "./zela.json";
 import ZelaAI from "./ZelaAI";
 import TransactionHistory from "./TransactionHistory";
+import PaystackOnramp from "./PaystackOnramp";
 
 const PROGRAM_ID = new PublicKey("G7BsDNn5y6h1dFngYtf1xNpg7btMFjmT24R6jWENK1yB");
 const DEVNET_USDC_MINT = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
@@ -227,6 +228,12 @@ export default function ZelaApp() {
               <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>Live Rate</span>
               <span style={{ color: "#00d4aa", fontWeight: 700, fontSize: 14 }}>$1 USDC = ₦{ngnRate.toLocaleString()}</span>
             </div>
+
+            <PaystackOnramp
+              ngnRate={ngnRate}
+              userEmail=""
+              onSuccess={fetchData}
+            />
 
             <div style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.3), rgba(0,212,170,0.2))", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, padding: "32px 24px", marginBottom: 24, textAlign: "center" }}>
               <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginBottom: 8 }}>Vault Balance</p>
