@@ -1,16 +1,11 @@
 import { useEffect, useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { PublicKey } from "@solana/web3.js";
 
 interface Transaction {
   signature: string;
-  type: string;
-  amount: string;
   time: string;
   status: string;
 }
-
-const PROGRAM_ID = new PublicKey("G7BsDNn5y6h1dFngYtf1xNpg7btMFjmT24R6jWENK1yB");
 
 export default function TransactionHistory() {
   const { connection } = useConnection();
@@ -19,8 +14,7 @@ export default function TransactionHistory() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!wallet.publicKey) return;
-    fetchHistory();
+    if (wallet.publicKey) fetchHistory();
   }, [wallet.publicKey]);
 
   const fetchHistory = async () => {
@@ -29,33 +23,26 @@ export default function TransactionHistory() {
     try {
       const signatures = await connection.getSignaturesForAddress(
         wallet.publicKey,
-        { limit: 10 }
+        { limit: 8 }
       );
-
-      const history: Transaction[] = signatures.map((sig, i) => {
-        const date = sig.blockTime
+      const history: Transaction[] = signatures.map(sig => ({
+        signature: sig.signature,
+        time: sig.blockTime
           ? new Date(sig.blockTime * 1000).toLocaleDateString("en-NG", {
-              day: "numeric",
-              month: "short",
-              hour: "2-digit",
-              minute: "2-digit",
+              day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
             })
-          : "Unknown";
-
-        return {
-          signature: sig.signature,
-          type: i === 0 ? "Recent" : "Transaction",
-          amount: "USDC",
-          time: date,
-          status: sig.err ? "Failed" : "Success",
-        };
-      });
-
+          : "Unknown",
+        status: sig.err ? "Failed" : "Success",
+      }));
       setTxs(history);
     } catch (e) {
       console.error(e);
     }
     setLoading(false);
+  };
+
+  const openExplorer = (sig: string) => {
+    window.open("https://explorer.solana.com/tx/" + sig + "?cluster=devnet", "_blank");
   };
 
   if (!wallet.connected) return null;
@@ -70,26 +57,19 @@ export default function TransactionHistory() {
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <p style={{ fontWeight: 700, margin: 0, fontSize: 15 }}>Transaction History</p>
-        <button
-          onClick={fetchHistory}
-          style={{
-            background: "transparent",
-            border: "1px solid rgba(255,255,255,0.2)",
-            borderRadius: 8,
-            color: "rgba(255,255,255,0.6)",
-            fontSize: 12,
-            padding: "4px 10px",
-            cursor: "pointer",
-          }}
-        >
-          Refresh
-        </button>
+        <button onClick={fetchHistory} style={{
+          background: "transparent",
+          border: "1px solid rgba(255,255,255,0.2)",
+          borderRadius: 8,
+          color: "rgba(255,255,255,0.6)",
+          fontSize: 12,
+          padding: "4px 10px",
+          cursor: "pointer",
+        }}>Refresh</button>
       </div>
 
       {loading && (
-        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, textAlign: "center" }}>
-          Loading history...
-        </p>
+        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, textAlign: "center" }}>Loading...</p>
       )}
 
       {!loading && txs.length === 0 && (
@@ -108,39 +88,27 @@ export default function TransactionHistory() {
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{
-              width: 36,
-              height: 36,
-              borderRadius: "50%",
+              width: 36, height: 36, borderRadius: "50%",
               background: tx.status === "Success" ? "rgba(0,212,170,0.15)" : "rgba(255,59,48,0.15)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 16,
+              display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14,
             }}>
-              {tx.status === "Success" ? "✓" : "✗"}
+              {tx.status === "Success" ? "+" : "!"}
             </div>
             <div>
-              <p style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>{tx.type}</p>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>Transaction</p>
               <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.4)" }}>{tx.time}</p>
             </div>
           </div>
           <div style={{ textAlign: "right" }}>
-            <p style={{
-              margin: 0,
-              fontSize: 12,
-              color: tx.status === "Success" ? "#00d4aa" : "#ff3b30",
-              fontWeight: 600,
-            }}>
+            <p style={{ margin: 0, fontSize: 12, color: tx.status === "Success" ? "#00d4aa" : "#ff3b30", fontWeight: 600 }}>
               {tx.status}
             </p>
-            
-              href={`https://explorer.solana.com/tx/${tx.signature}?cluster=devnet`}
-              target="_blank"
-              rel="noreferrer"
-              style={{ color: "rgba(255,255,255,0.3)", fontSize: 11 }}
+            <button
+              onClick={() => openExplorer(tx.signature)}
+              style={{ background: "none", border: "none", color: "rgba(255,255,255,0.3)", fontSize: 11, cursor: "pointer", padding: 0 }}
             >
-              View ↗
-            </a>
+              View
+            </button>
           </div>
         </div>
       ))}
