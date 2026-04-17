@@ -8,6 +8,7 @@ import idl from "./zela.json";
 import ZelaAI from "./ZelaAI";
 import TransactionHistory from "./TransactionHistory";
 import PaystackOnramp from "./PaystackOnramp";
+import PaystackOfframp from "./PaystackOfframp";
 
 const PROGRAM_ID = new PublicKey("G7BsDNn5y6h1dFngYtf1xNpg7btMFjmT24R6jWENK1yB");
 const DEVNET_USDC_MINT = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
@@ -347,6 +348,15 @@ export default function ZelaApp() {
                     </button>
                   </div>
                 </div>
+
+                <PaystackOfframp
+                  ngnRate={ngnRate}
+                  vaultBalance={totalDeposited}
+                  onWithdraw={(amount) => {
+                    setStatus("Withdrawal of $" + amount + " USDC initiated to your bank account!");
+                    fetchData();
+                  }}
+                />
               </>
             )}
 
