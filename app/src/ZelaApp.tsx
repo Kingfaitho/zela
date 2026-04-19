@@ -1,3 +1,6 @@
+import ReferralSystem from "./ReferralSystem";
+import SavingsGoals from "./SavingsGoals";
+import InflationTracker from "./InflationTracker";
 import { useState, useEffect, useCallback } from "react";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
@@ -361,6 +364,15 @@ export default function ZelaApp() {
             )}
 
             <TransactionHistory />
+
+            <InflationTracker
+  vaultBalance={totalDeposited}
+  totalDeposited={totalDeposited}
+  ngnRate={ngnRate}
+  depositCount={depositCount}
+/>
+<SavingsGoals vaultBalance={totalDeposited} ngnRate={ngnRate} />
+<ReferralSystem />
 
             <ZelaAI ngnRate={ngnRate} usdcBalance={usdcBalance} vaultBalance={totalDeposited} />
 
