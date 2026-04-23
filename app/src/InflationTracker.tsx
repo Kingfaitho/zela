@@ -7,7 +7,7 @@ interface InflationTrackerProps {
   depositCount: number;
 }
 
-export default function InflationTracker({ vaultBalance, totalDeposited, ngnRate, depositCount }: InflationTrackerProps) {
+export default function InflationTracker({ totalDeposited, ngnRate, depositCount }: InflationTrackerProps) {
   const [historicalRate, setHistoricalRate] = useState(1200);
   const [savedAmount, setSavedAmount] = useState(0);
 
