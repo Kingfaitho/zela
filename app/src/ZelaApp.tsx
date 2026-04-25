@@ -1,22 +1,24 @@
-import ReferralSystem from "./ReferralSystem";
-import SavingsGoals from "./SavingsGoals";
-import InflationTracker from "./InflationTracker";
 import { useState, useEffect, useCallback } from "react";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { Program, AnchorProvider, BN, setProvider } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
-import { getAccount, getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import idl from "./zela.json";
+import { getAssociatedTokenAddress, getAccount, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import ZelaAI from "./ZelaAI";
 import TransactionHistory from "./TransactionHistory";
 import PaystackOnramp from "./PaystackOnramp";
 import PaystackOfframp from "./PaystackOfframp";
+import ReferralSystem from "./ReferralSystem";
+import SavingsGoals from "./SavingsGoals";
+import InflationTracker from "./InflationTracker";
+import idl from "./zela.json";
 
 const PROGRAM_ID = new PublicKey("G7BsDNn5y6h1dFngYtf1xNpg7btMFjmT24R6jWENK1yB");
 const DEVNET_USDC_MINT = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
-const USDC_DECIMALS = 6;
 const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
+const USDC_DECIMALS = 6;
+
+type Tab = "home" | "send" | "save" | "ai" | "more";
 
 export default function ZelaApp() {
   const { connection } = useConnection();
@@ -30,8 +32,7 @@ export default function ZelaApp() {
   const [totalDeposited, setTotalDeposited] = useState(0);
   const [depositCount, setDepositCount] = useState(0);
   const [usdcBalance, setUsdcBalance] = useState(0);
-  const [recipientAddress, setRecipientAddress] = useState("");
-  const [sendAmount, setSendAmount] = useState("");
+  const [activeTab, setActiveTab] = useState<Tab>("home");
 
   const getProgram = useCallback(() => {
     const provider = new AnchorProvider(connection, wallet as any, {});
@@ -50,33 +51,24 @@ export default function ZelaApp() {
 
   const fetchRate = async () => {
     try {
-      const res = await fetch(
-        "https://open.er-api.com/v6/latest/USD"
-      );
+      const res = await fetch("https://open.er-api.com/v6/latest/USD");
       const data = await res.json();
-      const ngnPerUsd = data.rates?.NGN;
-      if (ngnPerUsd) setNgnRate(ngnPerUsd);
-    } catch {
-      setNgnRate(1650);
-    }
+      if (data.rates?.NGN) setNgnRate(data.rates.NGN);
+    } catch { setNgnRate(1650); }
   };
 
   const fetchData = useCallback(async () => {
     if (!wallet.connected || !wallet.publicKey) return;
     try {
-      const program = getProgram();
-      const vaultPda = getVaultPda();
-      if (!vaultPda) return;
-
-      // Fetch USDC balance
       try {
         const userUsdcAccount = await getAssociatedTokenAddress(DEVNET_USDC_MINT, wallet.publicKey);
         const usdcAccount = await getAccount(connection, userUsdcAccount);
         setUsdcBalance(Number(usdcAccount.amount) / Math.pow(10, USDC_DECIMALS));
       } catch { setUsdcBalance(0); }
-
-      // Fetch vault
+      const vaultPda = getVaultPda();
+      if (!vaultPda) return;
       try {
+        const program = getProgram();
         const vault = await program.account.zelaVault.fetch(vaultPda);
         setVaultExists(true);
         setTotalDeposited(vault.totalDeposited.toNumber() / Math.pow(10, USDC_DECIMALS));
@@ -88,33 +80,6 @@ export default function ZelaApp() {
   useEffect(() => { fetchRate(); const i = setInterval(fetchRate, 60000); return () => clearInterval(i); }, []);
   useEffect(() => { if (wallet.connected) fetchData(); }, [wallet.connected, fetchData]);
 
-  const initializeVault = async () => {
-    if (!wallet.publicKey) return;
-    setLoading(true);
-    setStatus("Creating your Zela vault...");
-    try {
-      const program = getProgram();
-      const vaultPda = getVaultPda();
-      await program.methods.initializeVault().accounts({
-        owner: wallet.publicKey,
-        mint: DEVNET_USDC_MINT,
-        vault: vaultPda,
-        systemProgram: PublicKey.default,
-      }).rpc();
-      setStatus("Vault created! Your money is now protected on Solana.");
-      fetchData();
-    } catch (e: any) {
-      if (e.message.includes("already in use")) {
-        setStatus("Vault already exists! Loading your vault...");
-        setVaultExists(true);
-        fetchData();
-      } else {
-        setStatus("Error: " + e.message);
-      }
-    }
-    setLoading(false);
-  };
-
   const deposit = async () => {
     if (!wallet.publicKey || !depositAmount) return;
     setLoading(true);
@@ -125,18 +90,14 @@ export default function ZelaApp() {
       const amount = new BN(parseFloat(depositAmount) * Math.pow(10, USDC_DECIMALS));
       const ownerTokenAccount = await getAssociatedTokenAddress(DEVNET_USDC_MINT, wallet.publicKey);
       const vaultTokenAccount = await getAssociatedTokenAddress(DEVNET_USDC_MINT, vaultPda!, true);
-
       await program.methods.deposit(amount).accounts({
-        owner: wallet.publicKey,
-        mint: DEVNET_USDC_MINT,
-        vault: vaultPda,
-        ownerTokenAccount,
-        vaultTokenAccount,
+        owner: wallet.publicKey, mint: DEVNET_USDC_MINT, vault: vaultPda,
+        ownerTokenAccount, vaultTokenAccount,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         tokenProgram: TOKEN_PROGRAM_ID,
         systemProgram: PublicKey.default,
       }).rpc();
-      setStatus("Deposited successfully! Your USDC is protected.");
+      setStatus("Deposited! Your USDC is protected.");
       setDepositAmount("");
       fetchData();
     } catch (e: any) { setStatus("Error: " + e.message); }
@@ -153,241 +114,220 @@ export default function ZelaApp() {
       const amount = new BN(parseFloat(withdrawAmount) * Math.pow(10, USDC_DECIMALS));
       const ownerTokenAccount = await getAssociatedTokenAddress(DEVNET_USDC_MINT, wallet.publicKey);
       const vaultTokenAccount = await getAssociatedTokenAddress(DEVNET_USDC_MINT, vaultPda!, true);
-
       await program.methods.withdraw(amount).accounts({
-        owner: wallet.publicKey,
-        mint: DEVNET_USDC_MINT,
-        vault: vaultPda,
-        ownerTokenAccount,
-        vaultTokenAccount,
+        owner: wallet.publicKey, mint: DEVNET_USDC_MINT, vault: vaultPda,
+        ownerTokenAccount, vaultTokenAccount,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         tokenProgram: TOKEN_PROGRAM_ID,
         systemProgram: PublicKey.default,
       }).rpc();
-      setStatus("Withdrawn successfully!");
+      setStatus("Withdrawn!");
       setWithdrawAmount("");
       fetchData();
     } catch (e: any) { setStatus("Error: " + e.message); }
     setLoading(false);
   };
 
-
-  const transferUsdc = async () => {
-    if (!wallet.publicKey || !sendAmount || !recipientAddress) return;
-    setLoading(true);
-    setStatus("Sending USDC...");
-    try {
-      const program = getProgram();
-      const vaultPda = getVaultPda();
-      const amount = new BN(parseFloat(sendAmount) * Math.pow(10, USDC_DECIMALS));
-      const senderVaultTokenAccount = await getAssociatedTokenAddress(DEVNET_USDC_MINT, vaultPda!, true);
-      const recipientPubkey = new PublicKey(recipientAddress);
-      const recipientTokenAccount = await getAssociatedTokenAddress(DEVNET_USDC_MINT, recipientPubkey);
-
-      await program.methods.transferUsdc(amount).accounts({
-        sender: wallet.publicKey,
-        mint: DEVNET_USDC_MINT,
-        senderVault: vaultPda,
-        senderVaultTokenAccount,
-        recipient: recipientPubkey,
-        recipientTokenAccount,
-        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        systemProgram: PublicKey.default,
-      }).rpc();
-      setStatus("Sent successfully! No P2P stress. No bad rates.");
-      setSendAmount("");
-      setRecipientAddress("");
-      fetchData();
-    } catch (e: any) { setStatus("Error: " + e.message); }
-    setLoading(false);
-  };
-
   const ngnBalance = (totalDeposited * ngnRate).toLocaleString("en-NG", { style: "currency", currency: "NGN" });
+  const userEmail = wallet.publicKey?.toString().slice(0, 8) || "";
+
+  const tabs: { id: Tab; icon: string; label: string }[] = [
+    { id: "home", icon: "🏠", label: "Home" },
+    { id: "send", icon: "💸", label: "Send" },
+    { id: "save", icon: "🎯", label: "Save" },
+    { id: "ai", icon: "🤖", label: "AI" },
+    { id: "more", icon: "⚡", label: "More" },
+  ];
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)", color: "white", fontFamily: "'Inter', sans-serif" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 24px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg, #00d4aa, #7c3aed)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700 }}>Z</div>
-          <span style={{ fontSize: 20, fontWeight: 700 }}>Zela</span>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)", color: "white", fontFamily: "'Inter', sans-serif", maxWidth: 480, margin: "0 auto", position: "relative", paddingBottom: 80 }}>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 20px 16px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg, #00d4aa, #7c3aed)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700 }}>Z</div>
+          <span style={{ fontSize: 18, fontWeight: 700 }}>Zela</span>
         </div>
-        <WalletMultiButton style={{ background: "linear-gradient(135deg, #00d4aa, #7c3aed)", border: "none", borderRadius: 12, fontSize: 14, fontWeight: 600 }} />
+        <WalletMultiButton style={{ background: "linear-gradient(135deg, #00d4aa, #7c3aed)", border: "none", borderRadius: 10, fontSize: 12, fontWeight: 600, padding: "8px 14px" }} />
       </div>
 
-      <div style={{ maxWidth: 480, margin: "0 auto", padding: "24px 16px" }}>
+      <div style={{ padding: "0 20px", paddingTop: 16 }}>
         {!wallet.connected ? (
-          <div style={{ textAlign: "center", paddingTop: 80 }}>
+          <div style={{ textAlign: "center", paddingTop: 60 }}>
             <div style={{ fontSize: 64, marginBottom: 20 }}>🔐</div>
-            <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 16, letterSpacing: "-1px" }}>Your money, protected.</h2>
-            <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 16, lineHeight: 1.7, marginBottom: 32 }}>
-              Stop losing money to bad P2P rates and inflation.<br/>
-              Zela keeps your USDC safe on Solana — only you can touch it.
+            <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 12, letterSpacing: "-1px" }}>Your money, protected.</h2>
+            <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 15, lineHeight: 1.7, marginBottom: 32 }}>
+              Stop losing money to bad P2P rates.<br/>Zela keeps your USDC safe on Solana.
             </p>
-            <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>Connect your Phantom wallet to get started</p>
+            <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13 }}>Connect Phantom wallet to get started</p>
           </div>
         ) : (
           <>
-            <div style={{ background: "rgba(0,212,170,0.1)", border: "1px solid rgba(0,212,170,0.3)", borderRadius: 12, padding: "12px 16px", marginBottom: 20, display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>Live Rate</span>
-              <span style={{ color: "#00d4aa", fontWeight: 700, fontSize: 14 }}>$1 USDC = ₦{ngnRate.toLocaleString()}</span>
-            </div>
-
-            <PaystackOnramp
-              ngnRate={ngnRate}
-              userEmail=""
-              onSuccess={fetchData}
-            />
-
-            <div style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.3), rgba(0,212,170,0.2))", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, padding: "32px 24px", marginBottom: 24, textAlign: "center" }}>
-              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginBottom: 8 }}>Vault Balance</p>
-              <h1 style={{ fontSize: 42, fontWeight: 800, margin: "0 0 4px", letterSpacing: "-1px" }}>{ngnBalance}</h1>
-              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 16, margin: "0 0 20px" }}>${totalDeposited.toFixed(2)} USDC</p>
-              <div style={{ display: "flex", justifyContent: "center", gap: 32 }}>
+            {/* Balance Card - always visible */}
+            <div style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.4), rgba(0,212,170,0.3))", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, padding: "24px 20px", marginBottom: 20, textAlign: "center" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>Vault Balance</span>
+                <span style={{ fontSize: 12, color: "#00d4aa", background: "rgba(0,212,170,0.1)", padding: "2px 8px", borderRadius: 20 }}>
+                  $1 = ₦{ngnRate.toLocaleString()}
+                </span>
+              </div>
+              <h1 style={{ fontSize: 36, fontWeight: 800, margin: "0 0 4px", letterSpacing: "-1px" }}>{ngnBalance}</h1>
+              <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14, margin: "0 0 16px" }}>${totalDeposited.toFixed(2)} USDC</p>
+              <div style={{ display: "flex", justifyContent: "space-around", borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 16 }}>
                 <div>
-                  <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, margin: "0 0 4px" }}>Wallet USDC</p>
-                  <p style={{ color: "white", fontWeight: 700, margin: 0 }}>${usdcBalance.toFixed(2)}</p>
+                  <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, margin: "0 0 2px" }}>Wallet</p>
+                  <p style={{ color: "white", fontWeight: 700, margin: 0, fontSize: 14 }}>${usdcBalance.toFixed(2)}</p>
                 </div>
                 <div>
-                  <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, margin: "0 0 4px" }}>Deposits</p>
-                  <p style={{ color: "white", fontWeight: 700, margin: 0 }}>{depositCount}</p>
+                  <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, margin: "0 0 2px" }}>Deposits</p>
+                  <p style={{ color: "white", fontWeight: 700, margin: 0, fontSize: 14 }}>{depositCount}</p>
                 </div>
                 <div>
-                  <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, margin: "0 0 4px" }}>Protection</p>
-                  <p style={{ color: "#00d4aa", fontWeight: 700, margin: 0 }}>Active ✓</p>
+                  <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 11, margin: "0 0 2px" }}>Protected</p>
+                  <p style={{ color: "#00d4aa", fontWeight: 700, margin: 0, fontSize: 14 }}>Active</p>
                 </div>
               </div>
             </div>
 
-            {!vaultExists ? (
-              <button onClick={initializeVault} disabled={loading} style={{ width: "100%", padding: "16px", background: "linear-gradient(135deg, #00d4aa, #7c3aed)", border: "none", borderRadius: 14, color: "white", fontSize: 16, fontWeight: 700, cursor: "pointer", marginBottom: 16 }}>
-                {loading ? "Creating vault..." : "Create My Zela Vault"}
-              </button>
-            ) : (
-              <>
-                <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
-                  <p style={{ fontWeight: 600, marginBottom: 12, fontSize: 15 }}>Deposit USDC</p>
-                  <div style={{ display: "flex", gap: 10 }}>
-                    <input type="number" placeholder="Amount" value={depositAmount} onChange={e => setDepositAmount(e.target.value)}
-                      style={{ flex: 1, padding: "12px 14px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10, color: "white", fontSize: 15, outline: "none" }} />
-                    <button onClick={deposit} disabled={loading} style={{ padding: "12px 20px", background: "#00d4aa", border: "none", borderRadius: 10, color: "#000", fontWeight: 700, cursor: "pointer", fontSize: 15 }}>
-                      {loading ? "..." : "Deposit"}
-                    </button>
-                  </div>
-                  {depositAmount && <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginTop: 8 }}>≈ ₦{(parseFloat(depositAmount || "0") * ngnRate).toLocaleString()}</p>}
+            {/* Quick Actions */}
+            {activeTab === "home" && (
+              <div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
+                  <button onClick={() => setActiveTab("send")} style={{ background: "rgba(0,212,170,0.15)", border: "1px solid rgba(0,212,170,0.3)", borderRadius: 14, padding: "16px 12px", color: "white", cursor: "pointer", textAlign: "center" }}>
+                    <div style={{ fontSize: 24, marginBottom: 6 }}>💸</div>
+                    <p style={{ margin: 0, fontWeight: 600, fontSize: 13 }}>Add Money</p>
+                    <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.5)" }}>Naira to USDC</p>
+                  </button>
+                  <button onClick={() => setActiveTab("send")} style={{ background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 14, padding: "16px 12px", color: "white", cursor: "pointer", textAlign: "center" }}>
+                    <div style={{ fontSize: 24, marginBottom: 6 }}>🏦</div>
+                    <p style={{ margin: 0, fontWeight: 600, fontSize: 13 }}>Withdraw</p>
+                    <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.5)" }}>To bank account</p>
+                  </button>
+                  <button onClick={() => setActiveTab("send")} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "16px 12px", color: "white", cursor: "pointer", textAlign: "center" }}>
+                    <div style={{ fontSize: 24, marginBottom: 6 }}>⬆️</div>
+                    <p style={{ margin: 0, fontWeight: 600, fontSize: 13 }}>Deposit</p>
+                    <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.5)" }}>USDC to vault</p>
+                  </button>
+                  <button onClick={() => setActiveTab("send")} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "16px 12px", color: "white", cursor: "pointer", textAlign: "center" }}>
+                    <div style={{ fontSize: 24, marginBottom: 6 }}>📤</div>
+                    <p style={{ margin: 0, fontWeight: 600, fontSize: 13 }}>Send</p>
+                    <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.5)" }}>To any wallet</p>
+                  </button>
                 </div>
-
-                <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
-                  <p style={{ fontWeight: 600, marginBottom: 12, fontSize: 15 }}>Withdraw USDC</p>
-                  <div style={{ display: "flex", gap: 10 }}>
-                    <input type="number" placeholder="Amount" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)}
-                      style={{ flex: 1, padding: "12px 14px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10, color: "white", fontSize: 15, outline: "none" }} />
-                    <button onClick={withdraw} disabled={loading} style={{ padding: "12px 20px", background: "#7c3aed", border: "none", borderRadius: 10, color: "white", fontWeight: 700, cursor: "pointer", fontSize: 15 }}>
-                      {loading ? "..." : "Withdraw"}
-                    </button>
-                  </div>
-                  {withdrawAmount && <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginTop: 8 }}>≈ ₦{(parseFloat(withdrawAmount || "0") * ngnRate).toLocaleString()}</p>}
-                </div>
-
-                {/* Send USDC */}
-                <div style={{
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: 16,
-                  padding: 20,
-                  marginBottom: 16,
-                }}>
-                  <p style={{ fontWeight: 600, marginBottom: 12, fontSize: 15 }}>Send USDC</p>
-                  <input
-                    type="text"
-                    placeholder="Recipient wallet address"
-                    value={recipientAddress}
-                    onChange={e => setRecipientAddress(e.target.value)}
-                    style={{
-                      width: "100%",
-                      padding: "12px 14px",
-                      background: "rgba(255,255,255,0.08)",
-                      border: "1px solid rgba(255,255,255,0.15)",
-                      borderRadius: 10,
-                      color: "white",
-                      fontSize: 14,
-                      outline: "none",
-                      marginBottom: 10,
-                      boxSizing: "border-box",
-                    }}
-                  />
-                  <div style={{ display: "flex", gap: 10 }}>
-                    <input
-                      type="number"
-                      placeholder="Amount USDC"
-                      value={sendAmount}
-                      onChange={e => setSendAmount(e.target.value)}
-                      style={{
-                        flex: 1,
-                        padding: "12px 14px",
-                        background: "rgba(255,255,255,0.08)",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        borderRadius: 10,
-                        color: "white",
-                        fontSize: 15,
-                        outline: "none",
-                      }}
-                    />
-                    <button
-                      onClick={transferUsdc}
-                      disabled={loading}
-                      style={{
-                        padding: "12px 20px",
-                        background: "linear-gradient(135deg, #00d4aa, #7c3aed)",
-                        border: "none",
-                        borderRadius: 10,
-                        color: "white",
-                        fontWeight: 700,
-                        cursor: "pointer",
-                        fontSize: 15,
-                      }}
-                    >
-                      {loading ? "..." : "Send"}
-                    </button>
-                  </div>
-                </div>
-
-                <PaystackOfframp
-                  ngnRate={ngnRate}
-                  vaultBalance={totalDeposited}
-                  onWithdraw={(amount) => {
-                    setStatus("Withdrawal of $" + amount + " USDC initiated to your bank account!");
-                    fetchData();
-                  }}
-                />
-              </>
+                <InflationTracker totalDeposited={totalDeposited} ngnRate={ngnRate} depositCount={depositCount} />
+                <TransactionHistory />
+              </div>
             )}
 
-            <TransactionHistory />
+            {activeTab === "send" && (
+              <div>
+                <PaystackOnramp ngnRate={ngnRate} userEmail={userEmail} onSuccess={fetchData} />
+                <PaystackOfframp ngnRate={ngnRate} vaultBalance={totalDeposited} onWithdraw={(amount) => { setStatus("Withdrawal of $" + amount + " initiated!"); fetchData(); }} />
+                {vaultExists && (
+                  <>
+                    <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
+                      <p style={{ fontWeight: 700, marginBottom: 12, fontSize: 15 }}>Deposit USDC to Vault</p>
+                      <div style={{ display: "flex", gap: 10 }}>
+                        <input type="number" placeholder="Amount" value={depositAmount} onChange={e => setDepositAmount(e.target.value)}
+                          style={{ flex: 1, padding: "12px 14px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10, color: "white", fontSize: 15, outline: "none" }} />
+                        <button onClick={deposit} disabled={loading} style={{ padding: "12px 20px", background: "#00d4aa", border: "none", borderRadius: 10, color: "#000", fontWeight: 700, cursor: "pointer" }}>
+                          {loading ? "..." : "Deposit"}
+                        </button>
+                      </div>
+                      {depositAmount && <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginTop: 8 }}>≈ ₦{(parseFloat(depositAmount || "0") * ngnRate).toLocaleString()}</p>}
+                    </div>
+                    <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
+                      <p style={{ fontWeight: 700, marginBottom: 12, fontSize: 15 }}>Withdraw USDC</p>
+                      <div style={{ display: "flex", gap: 10 }}>
+                        <input type="number" placeholder="Amount" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)}
+                          style={{ flex: 1, padding: "12px 14px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10, color: "white", fontSize: 15, outline: "none" }} />
+                        <button onClick={withdraw} disabled={loading} style={{ padding: "12px 20px", background: "#7c3aed", border: "none", borderRadius: 10, color: "white", fontWeight: 700, cursor: "pointer" }}>
+                          {loading ? "..." : "Withdraw"}
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
 
-            <InflationTracker
-  vaultBalance={totalDeposited}
-  totalDeposited={totalDeposited}
-  ngnRate={ngnRate}
-  depositCount={depositCount}
-/>
-<SavingsGoals vaultBalance={totalDeposited} ngnRate={ngnRate} />
-<ReferralSystem />
+            {activeTab === "save" && (
+              <div>
+                <SavingsGoals vaultBalance={totalDeposited} ngnRate={ngnRate} />
+                <ReferralSystem />
+              </div>
+            )}
 
-            <ZelaAI ngnRate={ngnRate} usdcBalance={usdcBalance} vaultBalance={totalDeposited} />
+            {activeTab === "ai" && (
+              <ZelaAI ngnRate={ngnRate} usdcBalance={usdcBalance} vaultBalance={totalDeposited} />
+            )}
+
+            {activeTab === "more" && (
+              <div>
+                <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
+                  <h3 style={{ margin: "0 0 16px", fontSize: 16 }}>About Zela</h3>
+                  <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 14, lineHeight: 1.7, margin: "0 0 16px" }}>
+                    Zela is a non-custodial USDC vault built on Solana. Your money is protected by smart contracts — not even Zela can access it.
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    <a href="https://explorer.solana.com/address/G7BsDNn5y6h1dFngYtf1xNpg7btMFjmT24R6jWENK1yB?cluster=devnet" target="_blank" rel="noreferrer"
+                      style={{ color: "#00d4aa", fontSize: 13, textDecoration: "none" }}>
+                      View Smart Contract on Solana Explorer
+                    </a>
+                    <a href="https://github.com/Kingfaitho/zela" target="_blank" rel="noreferrer"
+                      style={{ color: "#00d4aa", fontSize: 13, textDecoration: "none" }}>
+                      View Source Code on GitHub
+                    </a>
+                  </div>
+                </div>
+                <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
+                  <h3 style={{ margin: "0 0 8px", fontSize: 16 }}>Coming Soon</h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    {["🤝 Ajo — Group Savings on Solana", "📱 Mobile App", "🌍 More African Languages", "🏦 Mainnet Launch"].map((item, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <span style={{ fontSize: 14 }}>{item}</span>
+                        <span style={{ marginLeft: "auto", fontSize: 11, color: "rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.08)", padding: "2px 8px", borderRadius: 20 }}>Soon</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {status && (
-              <div style={{ padding: "14px 16px", background: status.includes("Error") ? "rgba(255,59,48,0.15)" : "rgba(0,212,170,0.15)", border: `1px solid ${status.includes("Error") ? "rgba(255,59,48,0.3)" : "rgba(0,212,170,0.3)"}`, borderRadius: 12, fontSize: 14, color: status.includes("Error") ? "#ff3b30" : "#00d4aa", marginBottom: 16 }}>
+              <div style={{ padding: "14px 16px", background: status.includes("Error") ? "rgba(255,59,48,0.15)" : "rgba(0,212,170,0.15)", border: "1px solid rgba(0,212,170,0.3)", borderRadius: 12, fontSize: 14, color: status.includes("Error") ? "#ff3b30" : "#00d4aa", marginBottom: 16 }}>
                 {status}
               </div>
             )}
-
-            <p style={{ textAlign: "center", color: "rgba(255,255,255,0.3)", fontSize: 12, marginTop: 16, lineHeight: 1.6 }}>
-              Your funds are secured by Solana smart contracts.<br/>Not even Zela can access your money.
-            </p>
           </>
         )}
       </div>
+
+      {/* Bottom Tab Bar */}
+      {wallet.connected && (
+        <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 480, background: "rgba(10,10,10,0.95)", borderTop: "1px solid rgba(255,255,255,0.1)", display: "flex", padding: "8px 0", zIndex: 100 }}>
+          {tabs.map(tab => (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
+              flex: 1,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: "8px 0",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 4,
+            }}>
+              <span style={{ fontSize: 20 }}>{tab.icon}</span>
+              <span style={{ fontSize: 10, color: activeTab === tab.id ? "#00d4aa" : "rgba(255,255,255,0.4)", fontWeight: activeTab === tab.id ? 700 : 400 }}>
+                {tab.label}
+              </span>
+              {activeTab === tab.id && (
+                <div style={{ width: 4, height: 4, borderRadius: "50%", background: "#00d4aa" }} />
+              )}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
