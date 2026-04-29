@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useState, useCallback } from "react";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { Program, AnchorProvider, BN, setProvider } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
@@ -26,9 +27,9 @@ export default function AjoFeature() {
   const { connection } = useConnection();
   const wallet = useWallet();
   const [view, setView] = useState<"list" | "create" | "group">("list");
-  const [groups, setGroups] = useState<AjoGroup[]>([]);
-  const [myGroups, setMyGroups] = useState<AjoGroup[]>([]);
-  const [selectedGroup, setSelectedGroup] = useState<AjoGroup | null>(null);
+  
+  
+  
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
 
