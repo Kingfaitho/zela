@@ -14,6 +14,7 @@ import BusinessPaymentLink from "./BusinessPaymentLink";
 import BusinessDashboard from "./BusinessDashboard";
 import InvoiceGenerator from "./InvoiceGenerator";
 import idl from "./zela.json";
+import AjoFeature from "./AjoFeature";
 
 const PROGRAM_ID = new PublicKey("G7BsDNn5y6h1dFngYtf1xNpg7btMFjmT24R6jWENK1yB");
 const DEVNET_USDC_MINT = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
@@ -425,7 +426,7 @@ export default function ZelaApp() {
                 <BusinessPaymentLink ngnRate={ngnRate} />
                 <InvoiceGenerator ngnRate={ngnRate} />
 
-                {/* Ajo Coming Soon Card */}
+                <AjoFeature />
                 <div style={{ background: "linear-gradient(135deg, rgba(0,212,170,0.1), rgba(124,58,237,0.1))", border: "1px solid rgba(0,212,170,0.2)", borderRadius: 16, padding: 20, marginBottom: 14 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                     <span style={{ fontSize: 24 }}>🤝</span>
