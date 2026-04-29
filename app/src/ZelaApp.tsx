@@ -13,8 +13,8 @@ import InflationTracker from "./InflationTracker";
 import BusinessPaymentLink from "./BusinessPaymentLink";
 import BusinessDashboard from "./BusinessDashboard";
 import InvoiceGenerator from "./InvoiceGenerator";
-import idl from "./zela.json";
 import AjoFeature from "./AjoFeature";
+import idl from "./zela.json";
 
 const PROGRAM_ID = new PublicKey("G7BsDNn5y6h1dFngYtf1xNpg7btMFjmT24R6jWENK1yB");
 const DEVNET_USDC_MINT = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
@@ -206,7 +206,6 @@ export default function ZelaApp() {
   return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(160deg, #080810 0%, #0d1220 60%, #0a1628 100%)", color: "white", fontFamily: "'Inter', -apple-system, sans-serif", maxWidth: 480, margin: "0 auto", position: "relative", paddingBottom: 90 }}>
 
-      {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", position: "sticky", top: 0, background: "rgba(8,8,16,0.95)", backdropFilter: "blur(20px)", zIndex: 50 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: "linear-gradient(135deg, #00d4aa, #7c3aed)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 800 }}>Z</div>
@@ -223,7 +222,7 @@ export default function ZelaApp() {
       <div style={{ padding: "16px 20px 0" }}>
         {!wallet.connected ? (
           <div style={{ textAlign: "center", paddingTop: 60 }}>
-            <div style={{ width: 80, height: 80, borderRadius: 24, background: "linear-gradient(135deg, #00d4aa20, #7c3aed20)", border: "1px solid rgba(124,58,237,0.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, margin: "0 auto 28px" }}>🔐</div>
+            <div style={{ width: 80, height: 80, borderRadius: 24, background: "linear-gradient(135deg, rgba(0,212,170,0.1), rgba(124,58,237,0.1))", border: "1px solid rgba(124,58,237,0.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, margin: "0 auto 28px" }}>🔐</div>
             <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 14, letterSpacing: "-1px", lineHeight: 1.2 }}>Your money,<br/>protected.</h2>
             <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 15, lineHeight: 1.7, marginBottom: 36 }}>
               Stop losing to P2P rates and inflation.<br/>Zela protects your USDC on Solana.
@@ -239,7 +238,6 @@ export default function ZelaApp() {
           </div>
         ) : (
           <>
-            {/* Balance Card — only on Home tab */}
             {activeTab === "home" && (
               <div style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.3), rgba(0,212,170,0.2))", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 22, padding: "22px 20px", marginBottom: 18 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
@@ -248,10 +246,7 @@ export default function ZelaApp() {
                     <span style={{ fontSize: 11, color: "#00d4aa", background: "rgba(0,212,170,0.1)", padding: "3px 8px", borderRadius: 20 }}>
                       $1 = ₦{ngnRate.toLocaleString()}
                     </span>
-                    <button
-                      onClick={() => setBalanceHidden(!balanceHidden)}
-                      style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "rgba(255,255,255,0.7)", fontSize: 13, padding: "4px 8px", cursor: "pointer" }}
-                    >
+                    <button onClick={() => setBalanceHidden(!balanceHidden)} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "rgba(255,255,255,0.7)", fontSize: 13, padding: "4px 8px", cursor: "pointer" }}>
                       {balanceHidden ? "👁" : "🙈"}
                     </button>
                   </div>
@@ -279,10 +274,8 @@ export default function ZelaApp() {
               </div>
             )}
 
-            {/* HOME TAB */}
             {activeTab === "home" && (
               <div>
-                {/* Quick Actions */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginBottom: 18 }}>
                   {[
                     { icon: "⬆️", label: "Add", action: () => setActiveTab("money") },
@@ -297,7 +290,6 @@ export default function ZelaApp() {
                   ))}
                 </div>
 
-                {/* Streak */}
                 {streak > 0 && (
                   <div style={{ background: "rgba(255,165,0,0.08)", border: "1px solid rgba(255,165,0,0.18)", borderRadius: 14, padding: "14px 16px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
@@ -312,12 +304,8 @@ export default function ZelaApp() {
 
                 <InflationTracker vaultBalance={totalDeposited} totalDeposited={totalDeposited} ngnRate={ngnRate} depositCount={depositCount} />
 
-                {/* Transaction History — collapsed by default */}
                 <div style={cardStyle}>
-                  <button
-                    onClick={() => setShowHistory(!showHistory)}
-                    style={{ width: "100%", background: "none", border: "none", color: "white", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", padding: 0 }}
-                  >
+                  <button onClick={() => setShowHistory(!showHistory)} style={{ width: "100%", background: "none", border: "none", color: "white", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", padding: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span style={{ fontSize: 15 }}>📋</span>
                       <span style={{ fontWeight: 600, fontSize: 14 }}>Transaction History</span>
@@ -341,10 +329,7 @@ export default function ZelaApp() {
                               <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.35)" }}>{tx.time}</p>
                             </div>
                           </div>
-                          <button
-                            onClick={() => window.open("https://explorer.solana.com/tx/" + tx.sig + "?cluster=devnet", "_blank")}
-                            style={{ background: "none", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "rgba(255,255,255,0.5)", fontSize: 11, padding: "4px 10px", cursor: "pointer" }}
-                          >
+                          <button onClick={() => window.open("https://explorer.solana.com/tx/" + tx.sig + "?cluster=devnet", "_blank")} style={{ background: "none", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "rgba(255,255,255,0.5)", fontSize: 11, padding: "4px 10px", cursor: "pointer" }}>
                             View
                           </button>
                         </div>
@@ -355,7 +340,6 @@ export default function ZelaApp() {
               </div>
             )}
 
-            {/* MONEY TAB */}
             {activeTab === "money" && (
               <div>
                 <p style={{ fontSize: 18, fontWeight: 700, margin: "0 0 16px", letterSpacing: "-0.3px" }}>Money</p>
@@ -400,7 +384,6 @@ export default function ZelaApp() {
               </div>
             )}
 
-            {/* GOALS TAB */}
             {activeTab === "save" && (
               <div>
                 <p style={{ fontSize: 18, fontWeight: 700, margin: "0 0 16px", letterSpacing: "-0.3px" }}>Goals & Rewards</p>
@@ -409,7 +392,6 @@ export default function ZelaApp() {
               </div>
             )}
 
-            {/* AI TAB */}
             {activeTab === "ai" && (
               <div>
                 <p style={{ fontSize: 18, fontWeight: 700, margin: "0 0 16px", letterSpacing: "-0.3px" }}>Zela AI</p>
@@ -417,40 +399,14 @@ export default function ZelaApp() {
               </div>
             )}
 
-            {/* BUSINESS TAB */}
             {activeTab === "business" && (
               <div>
                 <p style={{ fontSize: 18, fontWeight: 700, margin: "0 0 4px", letterSpacing: "-0.3px" }}>Business</p>
-                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: "0 0 16px" }}>Payment links, invoices, and revenue tracking</p>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: "0 0 16px" }}>Payment links, invoices, Ajo groups</p>
                 <BusinessDashboard ngnRate={ngnRate} totalDeposited={totalDeposited} depositCount={depositCount} />
                 <BusinessPaymentLink ngnRate={ngnRate} />
                 <InvoiceGenerator ngnRate={ngnRate} />
-
                 <AjoFeature />
-                <div style={{ background: "linear-gradient(135deg, rgba(0,212,170,0.1), rgba(124,58,237,0.1))", border: "1px solid rgba(0,212,170,0.2)", borderRadius: 16, padding: 20, marginBottom: 14 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                    <span style={{ fontSize: 24 }}>🤝</span>
-                    <div>
-                      <p style={{ margin: "0 0 2px", fontWeight: 700, fontSize: 15 }}>Ajo — Group Savings</p>
-                      <p style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.4)" }}>Smart contract deployed on Solana devnet</p>
-                    </div>
-                    <span style={{ marginLeft: "auto", fontSize: 11, color: "#00d4aa", background: "rgba(0,212,170,0.1)", padding: "3px 10px", borderRadius: 20, border: "1px solid rgba(0,212,170,0.2)", flexShrink: 0 }}>Beta soon</span>
-                  </div>
-                  <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, lineHeight: 1.6, margin: "0 0 14px" }}>
-                    Save money in groups — on the blockchain. No organiser can steal. No missing contributions. Ajo the way it should work.
-                  </p>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                    {["Security deposits lock", "Emergency voting", "Auto-distribution", "No trust needed"].map((f, i) => (
-                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <span style={{ color: "#00d4aa", fontSize: 11 }}>✓</span>
-                        <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>{f}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <p style={{ margin: "14px 0 0", fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
-                    Program: DHhqgD4WSanbkFZHPgxM4oSmodn5f24Jw1pyzX7sZcfA
-                  </p>
-                </div>
               </div>
             )}
 
@@ -463,7 +419,6 @@ export default function ZelaApp() {
         )}
       </div>
 
-      {/* Bottom Tab Bar */}
       {wallet.connected && (
         <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 480, background: "rgba(6,6,14,0.97)", backdropFilter: "blur(24px)", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", padding: "10px 0 16px", zIndex: 100 }}>
           {tabs.map(tab => (
