@@ -12,13 +12,16 @@ import ReferralSystem from "./ReferralSystem";
 import SavingsGoals from "./SavingsGoals";
 import InflationTracker from "./InflationTracker";
 import idl from "./zela.json";
+import BusinessPaymentLink from "./BusinessPaymentLink";
+import BusinessDashboard from "./BusinessDashboard";
+import InvoiceGenerator from "./InvoiceGenerator";
 
 const PROGRAM_ID = new PublicKey("G7BsDNn5y6h1dFngYtf1xNpg7btMFjmT24R6jWENK1yB");
 const DEVNET_USDC_MINT = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
 const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
 const USDC_DECIMALS = 6;
 
-type Tab = "home" | "send" | "save" | "ai" | "more";
+type Tab = "home" | "money" | "save" | "ai" | "business";
 
 export default function ZelaApp() {
   const { connection } = useConnection();
@@ -132,12 +135,12 @@ export default function ZelaApp() {
   const userEmail = wallet.publicKey?.toString().slice(0, 8) || "";
 
   const tabs: { id: Tab; icon: string; label: string }[] = [
-    { id: "home", icon: "🏠", label: "Home" },
-    { id: "send", icon: "💸", label: "Send" },
-    { id: "save", icon: "🎯", label: "Save" },
-    { id: "ai", icon: "🤖", label: "AI" },
-    { id: "more", icon: "⚡", label: "More" },
-  ];
+  { id: "home", icon: "🏠", label: "Home" },
+  { id: "money", icon: "💸", label: "Money" },
+  { id: "save", icon: "🎯", label: "Goals" },
+  { id: "ai", icon: "🤖", label: "AI" },
+  { id: "business", icon: "🏢", label: "Business" },
+];
 
   return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)", color: "white", fontFamily: "'Inter', sans-serif", maxWidth: 480, margin: "0 auto", position: "relative", paddingBottom: 80 }}>
@@ -192,33 +195,33 @@ export default function ZelaApp() {
             {activeTab === "home" && (
               <div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
-                  <button onClick={() => setActiveTab("send")} style={{ background: "rgba(0,212,170,0.15)", border: "1px solid rgba(0,212,170,0.3)", borderRadius: 14, padding: "16px 12px", color: "white", cursor: "pointer", textAlign: "center" }}>
+                  <button onClick={() => setActiveTab("money")} style={{ background: "rgba(0,212,170,0.15)", border: "1px solid rgba(0,212,170,0.3)", borderRadius: 14, padding: "16px 12px", color: "white", cursor: "pointer", textAlign: "center" }}>
                     <div style={{ fontSize: 24, marginBottom: 6 }}>💸</div>
                     <p style={{ margin: 0, fontWeight: 600, fontSize: 13 }}>Add Money</p>
                     <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.5)" }}>Naira to USDC</p>
                   </button>
-                  <button onClick={() => setActiveTab("send")} style={{ background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 14, padding: "16px 12px", color: "white", cursor: "pointer", textAlign: "center" }}>
+                  <button onClick={() => setActiveTab("money")} style={{ background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 14, padding: "16px 12px", color: "white", cursor: "pointer", textAlign: "center" }}>
                     <div style={{ fontSize: 24, marginBottom: 6 }}>🏦</div>
                     <p style={{ margin: 0, fontWeight: 600, fontSize: 13 }}>Withdraw</p>
                     <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.5)" }}>To bank account</p>
                   </button>
-                  <button onClick={() => setActiveTab("send")} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "16px 12px", color: "white", cursor: "pointer", textAlign: "center" }}>
+                  <button onClick={() => setActiveTab("money")} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "16px 12px", color: "white", cursor: "pointer", textAlign: "center" }}>
                     <div style={{ fontSize: 24, marginBottom: 6 }}>⬆️</div>
                     <p style={{ margin: 0, fontWeight: 600, fontSize: 13 }}>Deposit</p>
                     <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.5)" }}>USDC to vault</p>
                   </button>
-                  <button onClick={() => setActiveTab("send")} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "16px 12px", color: "white", cursor: "pointer", textAlign: "center" }}>
+                  <button onClick={() => setActiveTab("money")} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 14, padding: "16px 12px", color: "white", cursor: "pointer", textAlign: "center" }}>
                     <div style={{ fontSize: 24, marginBottom: 6 }}>📤</div>
                     <p style={{ margin: 0, fontWeight: 600, fontSize: 13 }}>Send</p>
                     <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.5)" }}>To any wallet</p>
                   </button>
                 </div>
-                <InflationTracker totalDeposited={totalDeposited} ngnRate={ngnRate} depositCount={depositCount} />
+                <InflationTracker vaultBalance={totalDeposited} totalDeposited={totalDeposited} ngnRate={ngnRate} depositCount={depositCount} />
                 <TransactionHistory />
               </div>
             )}
 
-            {activeTab === "send" && (
+            {activeTab === "money" && (
               <div>
                 <PaystackOnramp ngnRate={ngnRate} userEmail={userEmail} onSuccess={fetchData} />
                 <PaystackOfframp ngnRate={ngnRate} vaultBalance={totalDeposited} onWithdraw={(amount) => { setStatus("Withdrawal of $" + amount + " initiated!"); fetchData(); }} />
@@ -261,37 +264,19 @@ export default function ZelaApp() {
               <ZelaAI ngnRate={ngnRate} usdcBalance={usdcBalance} vaultBalance={totalDeposited} />
             )}
 
-            {activeTab === "more" && (
-              <div>
-                <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
-                  <h3 style={{ margin: "0 0 16px", fontSize: 16 }}>About Zela</h3>
-                  <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 14, lineHeight: 1.7, margin: "0 0 16px" }}>
-                    Zela is a non-custodial USDC vault built on Solana. Your money is protected by smart contracts — not even Zela can access it.
-                  </p>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                    <a href="https://explorer.solana.com/address/G7BsDNn5y6h1dFngYtf1xNpg7btMFjmT24R6jWENK1yB?cluster=devnet" target="_blank" rel="noreferrer"
-                      style={{ color: "#00d4aa", fontSize: 13, textDecoration: "none" }}>
-                      View Smart Contract on Solana Explorer
-                    </a>
-                    <a href="https://github.com/Kingfaitho/zela" target="_blank" rel="noreferrer"
-                      style={{ color: "#00d4aa", fontSize: 13, textDecoration: "none" }}>
-                      View Source Code on GitHub
-                    </a>
-                  </div>
-                </div>
-                <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
-                  <h3 style={{ margin: "0 0 8px", fontSize: 16 }}>Coming Soon</h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    {["🤝 Ajo — Group Savings on Solana", "📱 Mobile App", "🌍 More African Languages", "🏦 Mainnet Launch"].map((item, i) => (
-                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <span style={{ fontSize: 14 }}>{item}</span>
-                        <span style={{ marginLeft: "auto", fontSize: 11, color: "rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.08)", padding: "2px 8px", borderRadius: 20 }}>Soon</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
+            {activeTab === "business" && (
+  <div>
+    <h2 style={{ fontSize: 20, fontWeight: 700, margin: "0 0 16px", letterSpacing: "-0.5px" }}>Business</h2>
+    <BusinessDashboard
+      ngnRate={ngnRate}
+      
+      totalDeposited={totalDeposited}
+      depositCount={depositCount}
+    />
+    <BusinessPaymentLink ngnRate={ngnRate} />
+    <InvoiceGenerator ngnRate={ngnRate} />
+  </div>
+)}
 
             {status && (
               <div style={{ padding: "14px 16px", background: status.includes("Error") ? "rgba(255,59,48,0.15)" : "rgba(0,212,170,0.15)", border: "1px solid rgba(0,212,170,0.3)", borderRadius: 12, fontSize: 14, color: status.includes("Error") ? "#ff3b30" : "#00d4aa", marginBottom: 16 }}>
