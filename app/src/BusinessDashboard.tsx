@@ -42,7 +42,7 @@ export default function BusinessDashboard({ ngnRate, totalDeposited, depositCoun
     setShowAddExpense(false);
   };
 
-  if (!wallet.connected) return null;
+  // Show always
 
   return (
     <div style={{ marginBottom: 16 }}>

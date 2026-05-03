@@ -43,7 +43,7 @@ export default function InvoiceGenerator({ ngnRate }: InvoiceProps) {
     window.open("https://wa.me/?text=" + encodeURIComponent(invoiceText), "_blank");
   };
 
-  if (!wallet.connected) return null;
+  // Show always
 
   return (
     <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 16, padding: 20, marginBottom: 16 }}>

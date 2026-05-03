@@ -58,7 +58,7 @@ export default function BusinessPaymentLink({ ngnRate }: PaymentLinkProps) {
     window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
   };
 
-  if (!wallet.connected) return null;
+  // Show always
 
   return (
     <div style={{ marginBottom: 16 }}>

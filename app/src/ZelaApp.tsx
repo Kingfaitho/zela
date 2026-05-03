@@ -277,7 +277,7 @@ export default function ZelaApp() {
             <div style={{ width: 88, height: 88, borderRadius: 28, background: "linear-gradient(135deg, rgba(0,212,170,0.15), rgba(124,58,237,0.15))", border: "1px solid rgba(124,58,237,0.25)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, margin: "0 auto 28px" }}>🔐</div>
             <h2 style={{ fontSize: 30, fontWeight: 800, marginBottom: 14, letterSpacing: "-1.5px", lineHeight: 1.15 }}>Your money,<br/>protected.</h2>
             <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 15, lineHeight: 1.7, marginBottom: 36, maxWidth: 300, margin: "0 auto 36px" }}>
-              Stop losing to P2P rates and inflation. Sign in with your phone or email — no crypto knowledge needed.
+              Stop losing money to bad P2P rates and inflation. Join Zela and protect your savings today.
             </p>
             <button
               onClick={login}
@@ -287,9 +287,9 @@ export default function ZelaApp() {
             </button>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 260, margin: "0 auto" }}>
               {[
-                "Sign in with phone, email, or Google",
-                "No wallet or crypto knowledge needed",
-                "Balance shown in Naira",
+                "Save in dollars, see balance in Naira",
+                "Protected from inflation automatically",
+                "Send money across Africa instantly",
                 "Only you control your money",
               ].map((f, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>

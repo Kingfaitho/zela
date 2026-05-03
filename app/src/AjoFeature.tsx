@@ -178,7 +178,7 @@ export default function AjoFeature() {
     return { bg: "rgba(255,255,255,0.05)", border: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.4)", label: "Complete" };
   };
 
-  if (!wallet.connected) return null;
+  // Show always
 
   return (
     <div>
