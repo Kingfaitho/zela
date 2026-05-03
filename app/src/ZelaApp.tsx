@@ -283,7 +283,7 @@ export default function ZelaApp() {
               onClick={login}
               style={{ background: "linear-gradient(135deg, #00d4aa, #7c3aed)", border: "none", borderRadius: 14, color: "white", fontSize: 16, fontWeight: 700, padding: "16px 40px", cursor: "pointer", marginBottom: 24, width: "100%", maxWidth: 300 }}
             >
-              Get Started — It is Free
+              Get Started Free
             </button>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: 260, margin: "0 auto" }}>
               {[
