@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { usePrivy, useSolanaWallets } from "@privy-io/react-auth";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import { Program, AnchorProvider, BN } from "@coral-xyz/anchor";
 import { getAssociatedTokenAddress, getAccount, TOKEN_PROGRAM_ID } from "@solana/spl-token";
@@ -25,7 +25,7 @@ type Tab = "home" | "money" | "save" | "ai" | "business";
 
 export default function ZelaApp() {
   const { ready, authenticated, login, logout, user } = usePrivy();
-  const { wallets } = useSolanaWallets();
+  const { wallets } = useWallets();
 
   const [ngnRate, setNgnRate] = useState(1650);
   const [depositAmount, setDepositAmount] = useState("");
@@ -50,13 +50,19 @@ export default function ZelaApp() {
   const getProgram = useCallback(async () => {
     if (!wallet || !publicKey) return null;
     try {
-      const provider = await wallet.getProvider();
+      const solanaWallet = wallet as any;
       const anchorProvider = new AnchorProvider(
         connection,
         {
           publicKey,
-          signTransaction: async (tx: any) => provider.signTransaction(tx),
-          signAllTransactions: async (txs: any) => provider.signAllTransactions(txs),
+          signTransaction: async (tx: any) => {
+            if (solanaWallet.signTransaction) return solanaWallet.signTransaction(tx);
+            throw new Error("Wallet does not support signTransaction");
+          },
+          signAllTransactions: async (txs: any) => {
+            if (solanaWallet.signAllTransactions) return solanaWallet.signAllTransactions(txs);
+            return Promise.all(txs.map((tx: any) => solanaWallet.signTransaction(tx)));
+          },
         } as any,
         { commitment: "confirmed" }
       );
