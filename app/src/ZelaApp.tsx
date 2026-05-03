@@ -479,14 +479,15 @@ export default function ZelaApp() {
       </div>
 
       {authenticated && (
-        <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 480, background: "rgba(6,6,14,0.97)", backdropFilter: "blur(24px)", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", padding: "10px 0 16px", zIndex: 100 }}>
+        <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 480, background: "rgba(6,6,14,0.97)", backdropFilter: "blur(24px)", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", padding: "8px 0 20px", zIndex: 100 }}>
           {tabs.map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, background: "none", border: "none", cursor: "pointer", padding: "6px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
-              <span style={{ fontSize: 19, opacity: activeTab === tab.id ? 1 : 0.35 }}>{tab.icon}</span>
-              <span style={{ fontSize: 10, color: activeTab === tab.id ? "#00d4aa" : "rgba(255,255,255,0.3)", fontWeight: activeTab === tab.id ? 700 : 400 }}>
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, background: "none", border: "none", cursor: "pointer", padding: "4px 2px", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 0 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: activeTab === tab.id ? "rgba(0,212,170,0.15)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s" }}>
+                <span style={{ fontSize: 18 }}>{tab.icon}</span>
+              </div>
+              <span style={{ fontSize: 9, color: activeTab === tab.id ? "#00d4aa" : "rgba(255,255,255,0.3)", fontWeight: activeTab === tab.id ? 700 : 400, letterSpacing: "0.2px", whiteSpace: "nowrap" }}>
                 {tab.label}
               </span>
-              {activeTab === tab.id && <div style={{ width: 3, height: 3, borderRadius: "50%", background: "#00d4aa" }} />}
             </button>
           ))}
         </div>

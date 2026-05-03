@@ -83,7 +83,7 @@ export default function PaystackOfframp({ ngnRate, vaultBalance, onWithdraw }: O
             Convert your USDC directly to your Nigerian bank account. No P2P needed.
           </p>
           <p style={{ margin: "0 0 6px", fontSize: 12, color: "rgba(255,255,255,0.5)" }}>
-            Amount (USDC) — Vault: ${vaultBalance.toFixed(2)} available
+            Amount (USDC) Vault: ${vaultBalance.toFixed(2)} available
           </p>
           <input
             type="number"

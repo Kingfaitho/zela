@@ -45,7 +45,7 @@ export default function ReferralSystem() {
         </span>
       </div>
       <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginBottom: 16, lineHeight: 1.5 }}>
-        Share Zela with friends. When they deposit their first USDC, you both earn $1 USDC — automatically.
+        Share Zela with friends. When they deposit their first USDC, you both earn $1 USDC automatically.
       </p>
 
       <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 10, padding: "10px 14px", marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>

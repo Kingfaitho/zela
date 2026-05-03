@@ -168,7 +168,7 @@ export default function AjoFeature() {
   };
 
   const shareGroup = (group: AjoGroup) => {
-    const msg = "Join my Ajo group on Zela! We save $" + (group.contributionAmount / Math.pow(10, USDC_DECIMALS)).toFixed(2) + " USDC every " + " days together. Protected by Solana smart contract — nobody can cheat. Join here: https://zela-six-theta.vercel.app";
+    const msg = "Join my Ajo group on Zela! We save $" + (group.contributionAmount / Math.pow(10, USDC_DECIMALS)).toFixed(2) + " USDC every " + " days together. Protected by Solana smart contract nobody can cheat. Join here: https://zela-six-theta.vercel.app";
     window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
   };
 
@@ -187,7 +187,7 @@ export default function AjoFeature() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <div>
               <p style={{ fontSize: 18, fontWeight: 700, margin: "0 0 2px", letterSpacing: "-0.3px" }}>Ajo Groups</p>
-              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", margin: 0 }}>Group savings — protected by Solana</p>
+              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", margin: 0 }}>Group savings on Solana</p>
             </div>
             <button
               onClick={() => setView("create")}
@@ -202,10 +202,10 @@ export default function AjoFeature() {
             <p style={{ fontWeight: 600, margin: "0 0 10px", fontSize: 13 }}>How Zela Ajo Works</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {[
-                { icon: "🔐", text: "Everyone locks a security deposit — no one can disappear" },
+                { icon: "🔐", text: "Everyone locks a security deposit so no one can disappear" },
                 { icon: "🔄", text: "Each round, one member receives the full pot" },
                 { icon: "🗳️", text: "Emergency? Group votes to release funds early" },
-                { icon: "⚡", text: "Smart contract handles everything — no organiser needed" },
+                { icon: "⚡", text: "Smart contract handles everything automatically" },
               ].map((item, i) => (
                 <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
                   <span style={{ fontSize: 14, flexShrink: 0 }}>{item.icon}</span>

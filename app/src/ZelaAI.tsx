@@ -31,7 +31,7 @@ export default function ZelaAI({ ngnRate, usdcBalance, vaultBalance }: ZelaAIPro
     setMessages(newMessages);
 
     try {
-      const systemPrompt = `You are Zela AI, a financial assistant for Africans — specifically Nigerians earning or holding USDC. You help users make smart decisions about their money.
+      const systemPrompt = `You are Zela AI, a financial assistant for Africans specifically Nigerians earning or holding USDC. You help users make smart decisions about their money.
 
 Current market data:
 - USDC/NGN rate: ${ngnRate} Naira per 1 USDC
