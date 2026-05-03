@@ -17,14 +17,5 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 2000,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ["react", "react-dom"],
-          solana: ["@solana/web3.js", "@coral-xyz/anchor"],
-          privy: ["@privy-io/react-auth"],
-        }
-      }
-    }
   }
 });
