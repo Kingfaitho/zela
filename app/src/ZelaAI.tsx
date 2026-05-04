@@ -31,29 +31,17 @@ export default function ZelaAI({ ngnRate, usdcBalance, vaultBalance }: ZelaAIPro
     setMessages(newMessages);
 
     try {
-      const systemPrompt = `You are Zela AI, a financial assistant for Africans specifically Nigerians earning or holding USDC. You help users make smart decisions about their money.
+      const context = "You are Zela AI, a financial assistant for Nigerians holding USDC. " +
+        "Current rate: " + ngnRate + " Naira per 1 USDC. " +
+        "User wallet balance: $" + usdcBalance.toFixed(2) + ". " +
+        "User vault balance: $" + vaultBalance.toFixed(2) + " USDC = " + (vaultBalance * ngnRate).toLocaleString() + " Naira. " +
+        "Speak plainly in English or Pidgin. Keep answers under 80 words. Be specific and helpful.";
 
-Current market data:
-- USDC/NGN rate: ${ngnRate} Naira per 1 USDC
-- User wallet USDC balance: $${usdcBalance.toFixed(2)}
-- User vault balance protected: $${vaultBalance.toFixed(2)} USDC which equals ${(vaultBalance * ngnRate).toLocaleString()} Naira
+      const conversation = newMessages.map(function(m) {
+        return m.role + ": " + m.content;
+      }).join("\n");
 
-Your personality:
-- Speak plainly and directly, no financial jargon
-- You understand the Nigerian market and P2P pain
-- You give specific, actionable advice
-- Keep responses short and clear, under 100 words
-- Be encouraging but honest
-- You can respond in English or Pidgin English if the user writes in Pidgin`;
-
-      const fullPrompt = systemPrompt + "
-
-Conversation:
-" +
-        newMessages.map(m => m.role + ": " + m.content).join("
-") +
-        "
-assistant:";
+      const prompt = context + "\n\nConversation:\n" + conversation + "\nassistant:";
 
       const response = await fetch(
         "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + import.meta.env.VITE_GEMINI_API_KEY,
@@ -61,15 +49,15 @@ assistant:";
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: fullPrompt }] }],
+            contents: [{ parts: [{ text: prompt }] }],
             generationConfig: { maxOutputTokens: 200, temperature: 0.7 },
           }),
         }
       );
 
       const data = await response.json();
-      const assistantMessage = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I could not connect right now. Please try again.";
-      setMessages([...newMessages, { role: "assistant", content: assistantMessage }]);
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I could not connect right now. Please try again.";
+      setMessages([...newMessages, { role: "assistant", content: reply }]);
     } catch (e: any) {
       setMessages([...newMessages, { role: "assistant", content: "Sorry, I could not connect right now. Please try again." }]);
     }
