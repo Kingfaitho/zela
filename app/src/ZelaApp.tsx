@@ -13,6 +13,7 @@ import BusinessPaymentLink from "./BusinessPaymentLink";
 import BusinessDashboard from "./BusinessDashboard";
 import InvoiceGenerator from "./InvoiceGenerator";
 import AjoFeature from "./AjoFeature";
+import ZelaSplit from "./ZelaSplit";
 import idl from "./zela.json";
 import ZelaScore from "./ZelaScore";
 
@@ -46,7 +47,13 @@ export default function ZelaApp() {
   const [txHistory, setTxHistory] = useState<any[]>([]);
 
   const wallet = wallets?.[0];
-  const publicKey = wallet?.address ? new PublicKey(wallet.address) : null;
+  const publicKey = (() => {
+    try {
+      return wallet?.address ? new PublicKey(wallet.address) : null;
+    } catch {
+      return null;
+    }
+  })();
 
   const getProgram = useCallback(async () => {
     if (!wallet || !publicKey) return null;
@@ -474,6 +481,7 @@ export default function ZelaApp() {
                 <BusinessPaymentLink ngnRate={ngnRate} />
                 <InvoiceGenerator ngnRate={ngnRate} />
                 <AjoFeature />
+                <ZelaSplit ngnRate={ngnRate} />
               </div>
             )}
 
