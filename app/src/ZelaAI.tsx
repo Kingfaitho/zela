@@ -36,7 +36,7 @@ export default function ZelaAI({ ngnRate, usdcBalance, vaultBalance }: ZelaAIPro
 Current market data:
 - USDC/NGN rate: ${ngnRate} Naira per 1 USDC
 - User wallet USDC balance: $${usdcBalance.toFixed(2)}
-- User vault balance (protected): $${vaultBalance.toFixed(2)} USDC = ${(vaultBalance * ngnRate).toLocaleString()} Naira
+- User vault balance protected: $${vaultBalance.toFixed(2)} USDC which equals ${(vaultBalance * ngnRate).toLocaleString()} Naira
 
 Your personality:
 - Speak plainly and directly, no financial jargon
@@ -46,24 +46,29 @@ Your personality:
 - Be encouraging but honest
 - You can respond in English or Pidgin English if the user writes in Pidgin`;
 
-      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "llama3-8b-8192",
-          max_tokens: 200,
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...newMessages.map(m => ({ role: m.role, content: m.content })),
-          ],
-        }),
-      });
+      const fullPrompt = systemPrompt + "
+
+Conversation:
+" +
+        newMessages.map(m => m.role + ": " + m.content).join("
+") +
+        "
+assistant:";
+
+      const response = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + import.meta.env.VITE_GEMINI_API_KEY,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: fullPrompt }] }],
+            generationConfig: { maxOutputTokens: 200, temperature: 0.7 },
+          }),
+        }
+      );
 
       const data = await response.json();
-      const assistantMessage = data.choices[0].message.content;
+      const assistantMessage = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I could not connect right now. Please try again.";
       setMessages([...newMessages, { role: "assistant", content: assistantMessage }]);
     } catch (e: any) {
       setMessages([...newMessages, { role: "assistant", content: "Sorry, I could not connect right now. Please try again." }]);
@@ -72,58 +77,24 @@ Your personality:
   };
 
   return (
-    <div style={{
-      background: "rgba(255,255,255,0.05)",
-      border: "1px solid rgba(124,58,237,0.3)",
-      borderRadius: 16,
-      padding: 20,
-      marginBottom: 16,
-    }}>
+    <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-        <div style={{
-          width: 28,
-          height: 28,
-          borderRadius: "50%",
-          background: "linear-gradient(135deg, #00d4aa, #7c3aed)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 14,
-          fontWeight: 700,
-        }}>Z</div>
+        <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg, #00d4aa, #7c3aed)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800 }}>Z</div>
         <p style={{ fontWeight: 700, margin: 0, fontSize: 15 }}>Zela AI</p>
-        <span style={{ color: "#00d4aa", fontSize: 11, marginLeft: "auto" }}>● Live</span>
+        <span style={{ color: "#00d4aa", fontSize: 11, marginLeft: "auto", background: "rgba(0,212,170,0.1)", padding: "2px 8px", borderRadius: 20 }}>Live</span>
       </div>
 
-      <div style={{
-        height: 200,
-        overflowY: "auto",
-        marginBottom: 12,
-        display: "flex",
-        flexDirection: "column",
-        gap: 10,
-      }}>
+      <div style={{ height: 220, overflowY: "auto", marginBottom: 12, display: "flex", flexDirection: "column", gap: 10 }}>
         {messages.map((msg, i) => (
-          <div key={i} style={{
-            display: "flex",
-            justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
-          }}>
-            <div style={{
-              maxWidth: "85%",
-              padding: "10px 14px",
-              borderRadius: msg.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-              background: msg.role === "user" ? "linear-gradient(135deg, #7c3aed, #00d4aa)" : "rgba(255,255,255,0.1)",
-              fontSize: 13,
-              lineHeight: 1.5,
-              color: "white",
-            }}>
+          <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
+            <div style={{ maxWidth: "85%", padding: "10px 14px", borderRadius: msg.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px", background: msg.role === "user" ? "linear-gradient(135deg, #7c3aed, #00d4aa)" : "rgba(255,255,255,0.08)", fontSize: 13, lineHeight: 1.5, color: "white" }}>
               {msg.content}
             </div>
           </div>
         ))}
         {loading && (
           <div style={{ display: "flex", justifyContent: "flex-start" }}>
-            <div style={{ padding: "10px 14px", background: "rgba(255,255,255,0.1)", borderRadius: "16px 16px 16px 4px", fontSize: 13, color: "rgba(255,255,255,0.5)" }}>
+            <div style={{ padding: "10px 14px", background: "rgba(255,255,255,0.08)", borderRadius: "16px 16px 16px 4px", fontSize: 13, color: "rgba(255,255,255,0.4)" }}>
               Thinking...
             </div>
           </div>
@@ -137,32 +108,10 @@ Your personality:
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === "Enter" && sendMessage()}
-          style={{
-            flex: 1,
-            padding: "10px 14px",
-            background: "rgba(255,255,255,0.08)",
-            border: "1px solid rgba(255,255,255,0.15)",
-            borderRadius: 10,
-            color: "white",
-            fontSize: 14,
-            outline: "none",
-          }}
+          style={{ flex: 1, padding: "10px 14px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, color: "white", fontSize: 14, outline: "none" }}
         />
-        <button
-          onClick={sendMessage}
-          disabled={loading}
-          style={{
-            padding: "10px 16px",
-            background: "linear-gradient(135deg, #00d4aa, #7c3aed)",
-            border: "none",
-            borderRadius: 10,
-            color: "white",
-            fontWeight: 700,
-            cursor: "pointer",
-            fontSize: 14,
-          }}
-        >
-          {loading ? "..." : "→"}
+        <button onClick={sendMessage} disabled={loading} style={{ padding: "10px 16px", background: "linear-gradient(135deg, #00d4aa, #7c3aed)", border: "none", borderRadius: 10, color: "white", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>
+          {loading ? "..." : "Send"}
         </button>
       </div>
     </div>

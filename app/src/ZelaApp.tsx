@@ -14,6 +14,7 @@ import BusinessDashboard from "./BusinessDashboard";
 import InvoiceGenerator from "./InvoiceGenerator";
 import AjoFeature from "./AjoFeature";
 import idl from "./zela.json";
+import ZelaScore from "./ZelaScore";
 
 const ZELA_PROGRAM_ID = new PublicKey("G7BsDNn5y6h1dFngYtf1xNpg7btMFjmT24R6jWENK1yB");
 const DEVNET_USDC_MINT = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
@@ -362,6 +363,13 @@ export default function ZelaApp() {
                     <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#ffa500" }}>{streak}</p>
                   </div>
                 )}
+
+                <ZelaScore
+                  totalDeposited={totalDeposited}
+                  depositCount={depositCount}
+                  streak={streak}
+                  ngnRate={ngnRate}
+                />
 
                 <InflationTracker vaultBalance={totalDeposited} totalDeposited={totalDeposited} ngnRate={ngnRate} depositCount={depositCount} />
 
