@@ -475,9 +475,6 @@ export default function ZelaApp() {
               <div>
                 <p style={{ fontSize: 18, fontWeight: 700, margin: "0 0 4px", letterSpacing: "-0.3px" }}>Business</p>
                 <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: "0 0 16px" }}>Payment links, invoices, Ajo groups</p>
-                <BusinessDashboard ngnRate={ngnRate} totalDeposited={totalDeposited} depositCount={depositCount} />
-                <BusinessPaymentLink ngnRate={ngnRate} />
-                <InvoiceGenerator ngnRate={ngnRate} />
                 <AjoFeature />
                 <ZelaSplit ngnRate={ngnRate} />
               </div>
