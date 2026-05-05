@@ -13,6 +13,8 @@ import AjoFeature from "./AjoFeature";
 import ZelaSplit from "./ZelaSplit";
 import idl from "./zela.json";
 import ZelaScore from "./ZelaScore";
+import Onboarding from "./Onboarding";
+import FamilyVault from "./FamilyVault";
 
 const ZELA_PROGRAM_ID = new PublicKey("G7BsDNn5y6h1dFngYtf1xNpg7btMFjmT24R6jWENK1yB");
 const DEVNET_USDC_MINT = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
@@ -42,6 +44,9 @@ export default function ZelaApp() {
   const [showHistory, setShowHistory] = useState(false);
   const [streak, setStreak] = useState(0);
   const [txHistory, setTxHistory] = useState<any[]>([]);
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    return !localStorage.getItem("zela_onboarded");
+  });
 
   const wallet = wallets?.[0];
   const publicKey = (() => {
@@ -251,6 +256,17 @@ export default function ZelaApp() {
   return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(160deg, #080810 0%, #0d1220 60%, #0a1628 100%)", color: "white", fontFamily: "'Inter', -apple-system, sans-serif", width: "100%", maxWidth: 480, margin: "0 auto", position: "relative", paddingBottom: 90, boxSizing: "border-box" as any }}>
 
+      {/* Onboarding Overlay */}
+      {showOnboarding && authenticated && (
+        <Onboarding
+          onComplete={() => {
+            localStorage.setItem("zela_onboarded", "true");
+            setShowOnboarding(false);
+          }}
+          userName={userIdentifier}
+        />
+      )}
+
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", position: "sticky", top: 0, background: "rgba(8,8,16,0.95)", backdropFilter: "blur(20px)", zIndex: 50 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -459,6 +475,7 @@ export default function ZelaApp() {
               <div>
                 <p style={{ fontSize: 18, fontWeight: 700, margin: "0 0 4px", letterSpacing: "-0.3px" }}>Save & Grow</p>
                 <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: "0 0 16px" }}>Set goals. Track progress. Earn rewards for saving daily.</p>
+                <FamilyVault ngnRate={ngnRate} totalDeposited={totalDeposited} />
                 <SavingsGoals vaultBalance={totalDeposited} ngnRate={ngnRate} />
                 <ReferralSystem />
               </div>
@@ -474,7 +491,7 @@ export default function ZelaApp() {
             {activeTab === "business" && (
               <div>
                 <p style={{ fontSize: 18, fontWeight: 700, margin: "0 0 4px", letterSpacing: "-0.3px" }}>Business</p>
-                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: "0 0 16px" }}>Payment links, invoices, Ajo groups</p>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: "0 0 16px" }}>Save together on Solana. Nobody can steal.</p>
                 <AjoFeature />
                 <ZelaSplit ngnRate={ngnRate} />
               </div>

@@ -7,6 +7,7 @@ skip-lint = false
 
 [programs.devnet]
 ajo = "DHhqgD4WSanbkFZHPgxM4oSmodn5f24Jw1pyzX7sZcfA"
+zela_family = "4jxXxvP9XS3MGyKGNEsnXe4XzbtopkSr9thif36uGmno"
 
 [programs.localnet]
 zela = "G7BsDNn5y6h1dFngYtf1xNpg7btMFjmT24R6jWENK1yB"

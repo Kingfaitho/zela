@@ -3046,6 +3046,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "zela_family"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+]
+
+[[package]]
 name = "zerocopy"
 version = "0.8.48"
 source = "registry+https://github.com/rust-lang/crates.io-index"
