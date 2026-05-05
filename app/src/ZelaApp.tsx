@@ -9,9 +9,6 @@ import PaystackOfframp from "./PaystackOfframp";
 import ReferralSystem from "./ReferralSystem";
 import SavingsGoals from "./SavingsGoals";
 import InflationTracker from "./InflationTracker";
-import BusinessPaymentLink from "./BusinessPaymentLink";
-import BusinessDashboard from "./BusinessDashboard";
-import InvoiceGenerator from "./InvoiceGenerator";
 import AjoFeature from "./AjoFeature";
 import ZelaSplit from "./ZelaSplit";
 import idl from "./zela.json";
@@ -224,9 +221,9 @@ export default function ZelaApp() {
   const tabs: { id: Tab; icon: string; label: string }[] = [
     { id: "home", icon: "🏠", label: "Home" },
     { id: "money", icon: "💸", label: "Money" },
-    { id: "save", icon: "🎯", label: "Goals" },
+    { id: "save", icon: "🎯", label: "Save" },
     { id: "ai", icon: "🤖", label: "AI" },
-    { id: "business", icon: "🏢", label: "Business" },
+    { id: "business", icon: "🤝", label: "Ajo" },
   ];
 
   const inputStyle: React.CSSProperties = {
@@ -460,7 +457,8 @@ export default function ZelaApp() {
 
             {activeTab === "save" && (
               <div>
-                <p style={{ fontSize: 18, fontWeight: 700, margin: "0 0 16px", letterSpacing: "-0.3px" }}>Goals & Rewards</p>
+                <p style={{ fontSize: 18, fontWeight: 700, margin: "0 0 4px", letterSpacing: "-0.3px" }}>Save & Grow</p>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: "0 0 16px" }}>Set goals. Track progress. Earn rewards for saving daily.</p>
                 <SavingsGoals vaultBalance={totalDeposited} ngnRate={ngnRate} />
                 <ReferralSystem />
               </div>
