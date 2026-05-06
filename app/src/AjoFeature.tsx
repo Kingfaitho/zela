@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useCallback } from "react";
-import { useWallet, useConnection } from "@solana/wallet-adapter-react";
-import { Program, AnchorProvider, BN, setProvider } from "@coral-xyz/anchor";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { useConnection } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
+import { Program, AnchorProvider, BN, setProvider } from "@coral-xyz/anchor";
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import ajoIdl from "./ajo.json";
 
@@ -25,7 +26,13 @@ interface AjoGroup {
 
 export default function AjoFeature() {
   const { connection } = useConnection();
-  const wallet = useWallet();
+  const { authenticated } = usePrivy();
+  const { wallets } = useWallets();
+  const wallet = wallets?.[0] as any;
+  const walletPublicKey = (() => {
+    try { return wallet?.address ? new PublicKey(wallet.address) : null; }
+    catch { return null; }
+  })();
   const [view, setView] = useState<"list" | "create" | "group">("list");
   
   
@@ -47,13 +54,13 @@ export default function AjoFeature() {
   }, [connection, wallet]);
 
   const createGroup = async () => {
-    if (!wallet.publicKey || !groupName || !contribution) return;
+    if (!walletPublicKey || !groupName || !contribution) return;
     setLoading(true);
     setStatus("Creating Ajo group...");
     try {
       const program = getProgram();
       const [groupPda] = PublicKey.findProgramAddressSync(
-        [Buffer.from("ajo_group"), wallet.publicKey.toBuffer(), Buffer.from(groupName)],
+        [Buffer.from("ajo_group"), walletPublicKey.toBuffer(), Buffer.from(groupName)],
         AJO_PROGRAM_ID
       );
 
@@ -67,7 +74,7 @@ export default function AjoFeature() {
           1
         )
         .accounts({
-          admin: wallet.publicKey,
+          admin: walletPublicKey,
           mint: DEVNET_USDC_MINT,
           group: groupPda,
           systemProgram: PublicKey.default,
@@ -85,7 +92,7 @@ export default function AjoFeature() {
   };
 
   const joinGroup = async (group: AjoGroup) => {
-    if (!wallet.publicKey) return;
+    if (!walletPublicKey) return;
     setLoading(true);
     setStatus("Joining group and locking security deposit...");
     try {
@@ -93,7 +100,7 @@ export default function AjoFeature() {
       const groupPubkey = new PublicKey(group.publicKey);
 
       const [memberPda] = PublicKey.findProgramAddressSync(
-        [Buffer.from("ajo_member"), groupPubkey.toBuffer(), wallet.publicKey.toBuffer()],
+        [Buffer.from("ajo_member"), groupPubkey.toBuffer(), walletPublicKey.toBuffer()],
         AJO_PROGRAM_ID
       );
 
@@ -102,12 +109,12 @@ export default function AjoFeature() {
         AJO_PROGRAM_ID
       );
 
-      const memberTokenAccount = await getAssociatedTokenAddress(DEVNET_USDC_MINT, wallet.publicKey);
+      const memberTokenAccount = await getAssociatedTokenAddress(DEVNET_USDC_MINT, walletPublicKey);
 
       await program.methods
         .joinGroup()
         .accounts({
-          member: wallet.publicKey,
+          member: walletPublicKey,
           mint: DEVNET_USDC_MINT,
           group: groupPubkey,
           memberAccount: memberPda,
@@ -127,7 +134,7 @@ export default function AjoFeature() {
   };
 
   const contribute = async (group: AjoGroup) => {
-    if (!wallet.publicKey) return;
+    if (!walletPublicKey) return;
     setLoading(true);
     setStatus("Contributing to round...");
     try {
@@ -135,7 +142,7 @@ export default function AjoFeature() {
       const groupPubkey = new PublicKey(group.publicKey);
 
       const [memberPda] = PublicKey.findProgramAddressSync(
-        [Buffer.from("ajo_member"), groupPubkey.toBuffer(), wallet.publicKey.toBuffer()],
+        [Buffer.from("ajo_member"), groupPubkey.toBuffer(), walletPublicKey.toBuffer()],
         AJO_PROGRAM_ID
       );
 
@@ -144,12 +151,12 @@ export default function AjoFeature() {
         AJO_PROGRAM_ID
       );
 
-      const memberTokenAccount = await getAssociatedTokenAddress(DEVNET_USDC_MINT, wallet.publicKey);
+      const memberTokenAccount = await getAssociatedTokenAddress(DEVNET_USDC_MINT, walletPublicKey);
 
       await program.methods
         .contribute()
         .accounts({
-          member: wallet.publicKey,
+          member: walletPublicKey,
           mint: DEVNET_USDC_MINT,
           group: groupPubkey,
           memberAccount: memberPda,
