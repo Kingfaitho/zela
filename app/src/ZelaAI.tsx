@@ -31,36 +31,32 @@ export default function ZelaAI({ ngnRate, usdcBalance, vaultBalance }: ZelaAIPro
     setMessages(newMessages);
 
     try {
-      const context = "You are Zela AI, a financial assistant for Nigerians holding USDC. " +
-        "Current rate: " + ngnRate + " Naira per 1 USDC. " +
-        "User wallet balance: $" + usdcBalance.toFixed(2) + ". " +
-        "User vault balance: $" + vaultBalance.toFixed(2) + " USDC = " + (vaultBalance * ngnRate).toLocaleString() + " Naira. " +
-        "Speak plainly in English or Pidgin. Keep answers under 80 words. Be specific and helpful.";
+      const systemPrompt = "You are Zela AI, a financial assistant for Nigerians holding USDC. " +
+        "Current NGN/USDC rate: " + ngnRate + " Naira per 1 USDC. " +
+        "User wallet: $" + usdcBalance.toFixed(2) + " USDC. " +
+        "User vault: $" + vaultBalance.toFixed(2) + " USDC = NGN " + (vaultBalance * ngnRate).toLocaleString() + ". " +
+        "Speak plainly in English or Pidgin. Keep answers under 80 words. Be specific and helpful. No jargon.";
 
-      const conversation = newMessages.map(function(m) {
-        return m.role + ": " + m.content;
-      }).join("\n");
-
-      const prompt = context + "\n\nConversation:\n" + conversation + "\nassistant:";
-
-      const isLocal = window.location.hostname === "localhost";
-      const apiUrl = isLocal
-        ? "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + import.meta.env.VITE_GEMINI_API_KEY
-        : "/api/ai";
-
-      const body = {
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 200, temperature: 0.7 },
-      };
-
-      const response = await fetch(apiUrl, {
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        headers: {
+          "Authorization": "Bearer " + import.meta.env.VITE_OPENROUTER_API_KEY,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://zela-six-theta.vercel.app",
+          "X-Title": "Zela AI",
+        },
+        body: JSON.stringify({
+          model: "meta-llama/llama-3.1-8b-instruct:free",
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...newMessages.map(m => ({ role: m.role, content: m.content })),
+          ],
+          max_tokens: 200,
+        }),
       });
 
       const data = await response.json();
-      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I could not connect right now. Please try again.";
+      const reply = data.choices?.[0]?.message?.content || "Sorry, I could not connect right now. Please try again.";
       setMessages([...newMessages, { role: "assistant", content: reply }]);
     } catch (e: any) {
       setMessages([...newMessages, { role: "assistant", content: "Sorry, I could not connect right now. Please try again." }]);
