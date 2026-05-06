@@ -358,6 +358,44 @@ export default function ZelaApp() {
                   </div>
                 </div>
 
+                {publicKey && (
+                  <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+                    <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 10, margin: "0 0 8px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Your Wallet Address</p>
+                    <div style={{ background: "rgba(0,0,0,0.2)", borderRadius: 10, padding: "10px 12px", marginBottom: 8 }}>
+                      <p style={{ margin: "0 0 6px", fontSize: 11, color: "rgba(255,255,255,0.5)", fontFamily: "monospace", wordBreak: "break-all", lineHeight: 1.5 }}>
+                        {publicKey.toString()}
+                      </p>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(publicKey.toString());
+                            setStatus("Wallet address copied!");
+                            setTimeout(() => setStatus(""), 2000);
+                          }}
+                          style={{ flex: 1, padding: "7px", background: "rgba(255,255,255,0.08)", border: "none", borderRadius: 7, color: "white", fontSize: 12, cursor: "pointer", fontWeight: 600 }}
+                        >
+                          Copy Address
+                        </button>
+                        
+                          href={"https://faucet.solana.com"}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ flex: 1, padding: "7px", background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.25)", borderRadius: 7, color: "#a78bfa", fontSize: 12, fontWeight: 600, textAlign: "center", textDecoration: "none" }}
+                        >
+                          Get SOL
+                        </a>
+                        
+                          href={"https://faucet.circle.com"}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ flex: 1, padding: "7px", background: "rgba(0,212,170,0.1)", border: "1px solid rgba(0,212,170,0.2)", borderRadius: 7, color: "#00d4aa", fontSize: 12, fontWeight: 600, textAlign: "center", textDecoration: "none" }}
+                        >
+                          Get USDC
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {!vaultExists && publicKey && (
                   <div style={{ background: "linear-gradient(135deg, rgba(0,212,170,0.15), rgba(124,58,237,0.15))", border: "1px solid rgba(0,212,170,0.25)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
                     <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: 15 }}>Create your Zela Vault</p>
@@ -399,33 +437,7 @@ export default function ZelaApp() {
                     </button>
                   </div>
                 )}
-                {publicKey && usdcBalance === 0 && totalDeposited === 0 && (
-                  <div style={{ background: "rgba(255,165,0,0.08)", border: "1px solid rgba(255,165,0,0.2)", borderRadius: 14, padding: 16, marginBottom: 14 }}>
-                    <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: 13, color: "#ffa500" }}>Get started with test funds</p>
-                    <p style={{ margin: "0 0 12px", fontSize: 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }}>
-                      Your wallet is ready. Get free test SOL and USDC to try Zela.
-                    </p>
-                    <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: 8, padding: "8px 12px", marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontFamily: "monospace" }}>{publicKey.toString().slice(0,20)}...</span>
-                      <button
-                        onClick={() => { navigator.clipboard.writeText(publicKey.toString()); }}
-                        style={{ background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 6, color: "white", fontSize: 11, padding: "4px 8px", cursor: "pointer" }}
-                      >
-                        Copy
-                      </button>
-                    </div>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <a href="https://faucet.solana.com" target="_blank" rel="noreferrer"
-                        style={{ flex: 1, padding: "9px", background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 9, color: "#a78bfa", fontSize: 12, fontWeight: 600, textAlign: "center", textDecoration: "none" }}>
-                        Get SOL
-                      </a>
-                      <a href="https://faucet.circle.com" target="_blank" rel="noreferrer"
-                        style={{ flex: 1, padding: "9px", background: "rgba(0,212,170,0.15)", border: "1px solid rgba(0,212,170,0.25)", borderRadius: 9, color: "#00d4aa", fontSize: 12, fontWeight: 600, textAlign: "center", textDecoration: "none" }}>
-                        Get USDC
-                      </a>
-                    </div>
-                  </div>
-                )}
+
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginBottom: 18 }}>
                   {[
                     { icon: "⬆️", label: "Add", action: () => setActiveTab("money") },
