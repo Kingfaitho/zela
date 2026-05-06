@@ -31,6 +31,36 @@ Add money with Naira. Withdraw to your Nigerian bank account. No crypto exchange
 **Business Tools**
 Create payment links in seconds. Share on WhatsApp. Generate professional invoices. Track income and expenses.
 
+## What Makes Zela Different
+
+Zela is the only African fintech that protects your money in three ways at once:
+
+1. From inflation : USDC holds value while Naira loses value
+
+2. From P2P scammers : non-custodial smart contract, nobody holds your money
+
+3. From death and loss : Family Vault automatically releases to your loved ones if you stop checking in
+
+## What Makes Zela Different
+
+Zela is the only African fintech that protects your money in three ways at once:
+
+1. From inflation : USDC holds value while Naira loses value
+
+2. From P2P scammers : non-custodial smart contract, nobody holds your money
+
+3. From death and loss : Family Vault automatically releases to your loved ones if you stop checking in
+
+## What Makes Zela Different
+
+Zela is the only African fintech that protects your money in three ways at once:
+
+1. From inflation : USDC holds value while Naira loses value
+
+2. From P2P scammers : non-custodial smart contract, nobody holds your money
+
+3. From death and loss : Family Vault automatically releases to your loved ones if you stop checking in
+
 ## Smart Contracts
 
 Zela Vault: G7BsDNn5y6h1dFngYtf1xNpg7btMFjmT24R6jWENK1yB
