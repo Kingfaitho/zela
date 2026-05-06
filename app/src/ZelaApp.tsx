@@ -358,6 +358,47 @@ export default function ZelaApp() {
                   </div>
                 </div>
 
+                {!vaultExists && publicKey && (
+                  <div style={{ background: "linear-gradient(135deg, rgba(0,212,170,0.15), rgba(124,58,237,0.15))", border: "1px solid rgba(0,212,170,0.25)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
+                    <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: 15 }}>Create your Zela Vault</p>
+                    <p style={{ margin: "0 0 14px", fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.5 }}>
+                      Your vault is the smart contract that holds your USDC on Solana. Only you can access it.
+                    </p>
+                    <button
+                      onClick={async () => {
+                        setLoading(true);
+                        setStatus("Creating your vault on Solana...");
+                        try {
+                          const program = await getProgram();
+                          if (!program) throw new Error("Wallet not ready");
+                          const vaultPda = getVaultPda();
+                          await program.methods.initializeVault().accounts({
+                            owner: publicKey,
+                            mint: DEVNET_USDC_MINT,
+                            vault: vaultPda,
+                            systemProgram: PublicKey.default,
+                          }).rpc();
+                          setVaultExists(true);
+                          setStatus("Vault created! You are protected.");
+                          fetchData();
+                        } catch (e: any) {
+                          if (e.message.includes("already in use")) {
+                            setVaultExists(true);
+                            setStatus("Vault is ready!");
+                            fetchData();
+                          } else {
+                            setStatus("Error: " + e.message);
+                          }
+                        }
+                        setLoading(false);
+                      }}
+                      disabled={loading}
+                      style={{ width: "100%", padding: "14px", background: "linear-gradient(135deg, #00d4aa, #7c3aed)", border: "none", borderRadius: 12, color: "white", fontSize: 15, fontWeight: 700, cursor: "pointer" }}
+                    >
+                      {loading ? "Creating vault..." : "Create My Vault"}
+                    </button>
+                  </div>
+                )}
                 {publicKey && usdcBalance === 0 && totalDeposited === 0 && (
                   <div style={{ background: "rgba(255,165,0,0.08)", border: "1px solid rgba(255,165,0,0.2)", borderRadius: 14, padding: 16, marginBottom: 14 }}>
                     <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: 13, color: "#ffa500" }}>Get started with test funds</p>
