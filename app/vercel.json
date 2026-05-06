@@ -3,6 +3,11 @@
   "outputDirectory": "dist",
   "installCommand": "npm install --legacy-peer-deps",
   "framework": "vite",
+  "functions": {
+    "api/ai.js": {
+      "runtime": "edge"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
