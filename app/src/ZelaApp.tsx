@@ -377,6 +377,7 @@ export default function ZelaApp() {
                           Copy Address
                         </button>
                         
+                        <a
                           href={"https://faucet.solana.com"}
                           target="_blank"
                           rel="noreferrer"
@@ -385,6 +386,7 @@ export default function ZelaApp() {
                           Get SOL
                         </a>
                         
+                        <a
                           href={"https://faucet.circle.com"}
                           target="_blank"
                           rel="noreferrer"
