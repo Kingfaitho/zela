@@ -43,10 +43,11 @@ export default function ZelaAI({ ngnRate, usdcBalance, vaultBalance }: ZelaAIPro
           "Authorization": "Bearer " + import.meta.env.VITE_OPENROUTER_API_KEY,
           "Content-Type": "application/json",
           "HTTP-Referer": "https://zela-six-theta.vercel.app",
+          "X-Title": "Zela",
           "X-Title": "Zela AI",
         },
         body: JSON.stringify({
-          model: "google/gemma-3-4b-it:free",
+          model: "mistralai/mistral-7b-instruct:free",
           messages: [
             { role: "system", content: systemPrompt },
             ...newMessages.map(m => ({ role: m.role, content: m.content })),
