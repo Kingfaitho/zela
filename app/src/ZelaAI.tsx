@@ -44,7 +44,6 @@ export default function ZelaAI({ ngnRate, usdcBalance, vaultBalance }: ZelaAIPro
           "Content-Type": "application/json",
           "HTTP-Referer": "https://zela-six-theta.vercel.app",
           "X-Title": "Zela",
-          "X-Title": "Zela AI",
         },
         body: JSON.stringify({
           model: "mistralai/mistral-7b-instruct:free",

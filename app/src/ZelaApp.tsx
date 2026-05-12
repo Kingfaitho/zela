@@ -15,6 +15,7 @@ import idl from "./zela.json";
 import ZelaScore from "./ZelaScore";
 import Onboarding from "./Onboarding";
 import FamilyVault from "./FamilyVault";
+import Settings from "./Settings";
 
 const ZELA_PROGRAM_ID = new PublicKey("G7BsDNn5y6h1dFngYtf1xNpg7btMFjmT24R6jWENK1yB");
 const DEVNET_USDC_MINT = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
@@ -22,7 +23,7 @@ const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xW
 const USDC_DECIMALS = 6;
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
-type Tab = "home" | "money" | "save" | "ai" | "business";
+type Tab = "home" | "money" | "save" | "ai" | "settings";
 
 export default function ZelaApp() {
   const { ready, authenticated, login, logout, user } = usePrivy();
@@ -228,7 +229,7 @@ export default function ZelaApp() {
     { id: "money", icon: "💸", label: "Money" },
     { id: "save", icon: "🎯", label: "Save" },
     { id: "ai", icon: "🤖", label: "AI" },
-    { id: "business", icon: "🤝", label: "Ajo" },
+    { id: "settings", icon: "⚙️", label: "Settings" },
   ];
 
   const inputStyle: React.CSSProperties = {
@@ -570,14 +571,9 @@ export default function ZelaApp() {
               </div>
             )}
 
-            {activeTab === "business" && (
-              <div>
-                <p style={{ fontSize: 18, fontWeight: 700, margin: "0 0 4px", letterSpacing: "-0.3px" }}>Business</p>
-                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: "0 0 16px" }}>Save together on Solana. Nobody can steal.</p>
-                <AjoFeature />
-                <ZelaSplit ngnRate={ngnRate} />
-              </div>
-            )}
+            {activeTab === "settings" && (
+  <Settings ngnRate={ngnRate} />
+)}
 
             {status && (
               <div style={{ padding: "12px 16px", background: status.includes("Error") ? "rgba(255,59,48,0.1)" : "rgba(0,212,170,0.1)", border: "1px solid " + (status.includes("Error") ? "rgba(255,59,48,0.2)" : "rgba(0,212,170,0.2)"), borderRadius: 12, fontSize: 13, color: status.includes("Error") ? "#ff6b6b" : "#00d4aa", marginBottom: 16, lineHeight: 1.5 }}>
