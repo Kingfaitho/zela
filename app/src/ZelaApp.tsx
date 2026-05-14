@@ -23,7 +23,7 @@ const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xW
 const USDC_DECIMALS = 6;
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
-type Tab = "home" | "money" | "save" | "ai" | "settings";
+type Tab = "home" | "money" | "community" | "ai" | "settings";
 
 export default function ZelaApp() {
   const { ready, authenticated, login, logout, user } = usePrivy();
@@ -227,7 +227,7 @@ export default function ZelaApp() {
   const tabs: { id: Tab; icon: string; label: string }[] = [
     { id: "home", icon: "🏠", label: "Home" },
     { id: "money", icon: "💸", label: "Money" },
-    { id: "save", icon: "🎯", label: "Save" },
+    { id: "community", icon: "🤝", label: "Community" },
     { id: "ai", icon: "🤖", label: "AI" },
     { id: "settings", icon: "⚙️", label: "Settings" },
   ];
@@ -441,16 +441,19 @@ export default function ZelaApp() {
                   </div>
                 )}
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginBottom: 18 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 18 }}>
                   {[
-                    { icon: "⬆️", label: "Add", action: () => setActiveTab("money") },
-                    { icon: "⬇️", label: "Withdraw", action: () => setActiveTab("money") },
-                    { icon: "📤", label: "Send", action: () => setActiveTab("money") },
-                    { icon: "🎯", label: "Goals", action: () => setActiveTab("save") },
+                    { icon: "💸", label: "Add Money", desc: "Naira to USDC instantly", color: "rgba(0,212,170,0.15)", border: "rgba(0,212,170,0.25)", action: () => setActiveTab("money") },
+                    { icon: "⬇️", label: "Withdraw", desc: "Send to your bank", color: "rgba(124,58,237,0.15)", border: "rgba(124,58,237,0.25)", action: () => setActiveTab("money") },
+                    { icon: "🤝", label: "Ajo Groups", desc: "Save with your community", color: "rgba(255,165,0,0.1)", border: "rgba(255,165,0,0.2)", action: () => setActiveTab("community") },
+                    { icon: "🧾", label: "Split Bills", desc: "Share expenses easily", color: "rgba(255,255,255,0.05)", border: "rgba(255,255,255,0.1)", action: () => setActiveTab("community") },
+                    { icon: "🎯", label: "Save Goals", desc: "Track your targets", color: "rgba(255,255,255,0.05)", border: "rgba(255,255,255,0.1)", action: () => setActiveTab("settings") },
+                    { icon: "🤖", label: "Zela AI", desc: "Get financial advice", color: "rgba(124,58,237,0.1)", border: "rgba(124,58,237,0.2)", action: () => setActiveTab("ai") },
                   ].map((a, i) => (
-                    <button key={i} onClick={a.action} style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "14px 6px", color: "white", cursor: "pointer", textAlign: "center" }}>
-                      <div style={{ fontSize: 20, marginBottom: 5 }}>{a.icon}</div>
-                      <p style={{ margin: 0, fontSize: 10, color: "rgba(255,255,255,0.55)", fontWeight: 500 }}>{a.label}</p>
+                    <button key={i} onClick={a.action} style={{ background: a.color, border: "1px solid " + a.border, borderRadius: 14, padding: "16px 14px", color: "white", cursor: "pointer", textAlign: "left" }}>
+                      <div style={{ fontSize: 24, marginBottom: 8 }}>{a.icon}</div>
+                      <p style={{ margin: "0 0 2px", fontSize: 13, fontWeight: 700 }}>{a.label}</p>
+                      <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.45)" }}>{a.desc}</p>
                     </button>
                   ))}
                 </div>
