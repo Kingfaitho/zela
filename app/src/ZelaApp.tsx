@@ -45,6 +45,7 @@ export default function ZelaApp() {
   const [showHistory, setShowHistory] = useState(false);
   const [streak, setStreak] = useState(0);
   const [txHistory, setTxHistory] = useState<any[]>([]);
+  const [showAI, setShowAI] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return !localStorage.getItem("zela_onboarded");
   });
@@ -448,7 +449,7 @@ export default function ZelaApp() {
                     { icon: "🤝", label: "Ajo Groups", desc: "Save with your community", color: "rgba(255,165,0,0.1)", border: "rgba(255,165,0,0.2)", action: () => setActiveTab("community") },
                     { icon: "🧾", label: "Split Bills", desc: "Share expenses easily", color: "rgba(255,255,255,0.05)", border: "rgba(255,255,255,0.1)", action: () => setActiveTab("community") },
                     { icon: "🛡️", label: "Protection", desc: "Family vault and goals", color: "rgba(0,212,170,0.08)", border: "rgba(0,212,170,0.15)", action: () => setActiveTab("protection") },
-                    { icon: "🤖", label: "Zela AI", desc: "Get financial advice", color: "rgba(124,58,237,0.1)", border: "rgba(124,58,237,0.2)", action: () => { const el = document.getElementById("zela-ai-btn"); if(el) el.click(); } },
+                    { icon: "🤖", label: "Zela AI", desc: "Get financial advice", color: "rgba(124,58,237,0.1)", border: "rgba(124,58,237,0.2)", action: () => setShowAI(true) },
                   ].map((a, i) => (
                     <button key={i} onClick={a.action} style={{ background: a.color, border: "1px solid " + a.border, borderRadius: 14, padding: "16px 14px", color: "white", cursor: "pointer", textAlign: "left" }}>
                       <div style={{ fontSize: 24, marginBottom: 8 }}>{a.icon}</div>
@@ -572,8 +573,7 @@ export default function ZelaApp() {
                 <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: "0 0 16px" }}>Your money protected from inflation, loss, and death.</p>
                 <FamilyVault ngnRate={ngnRate} totalDeposited={totalDeposited} />
                 <SavingsGoals vaultBalance={totalDeposited} ngnRate={ngnRate} />
-                <InflationTracker ngnRate={ngnRate} totalDeposited={totalDeposited} vaultBalance={totalDeposited} depositCount={depositCount} />
-                <ZelaScore totalDeposited={totalDeposited} depositCount={depositCount} streak={streak} ngnRate={ngnRate} />
+
               </div>
             )}
             {activeTab === "settings" && (
