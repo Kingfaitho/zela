@@ -17,7 +17,8 @@ export default function Settings({ ngnRate }: SettingsProps) {
   const [saved, setSaved] = useState("");
 
   const userEmail = user?.email?.address || user?.phone?.number || "";
-  const walletAddress = wallets?.find(w => w.address && !w.address.startsWith("0x"))?.address || wallets?.find(w => w.address && w.address.length > 30)?.address || "";
+  const solanaWallet = wallets?.find(w => w.address && !w.address.startsWith("0x") && w.address.length >= 32);
+  const walletAddress = solanaWallet?.address || "";
 
   const saveUsername = () => {
     if (!tempUsername.trim()) return;
