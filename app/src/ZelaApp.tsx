@@ -23,7 +23,7 @@ const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xW
 const USDC_DECIMALS = 6;
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
-type Tab = "home" | "money" | "community" | "ai" | "settings";
+type Tab = "home" | "money" | "community" | "protection" | "settings";
 
 export default function ZelaApp() {
   const { ready, authenticated, login, logout, user } = usePrivy();
@@ -228,7 +228,7 @@ export default function ZelaApp() {
     { id: "home", icon: "🏠", label: "Home" },
     { id: "money", icon: "💸", label: "Money" },
     { id: "community", icon: "🤝", label: "Community" },
-    { id: "ai", icon: "🤖", label: "AI" },
+    { id: "protection", icon: "🛡️", label: "Protection" },
     { id: "settings", icon: "⚙️", label: "Settings" },
   ];
 
@@ -447,8 +447,8 @@ export default function ZelaApp() {
                     { icon: "⬇️", label: "Withdraw", desc: "Send to your bank", color: "rgba(124,58,237,0.15)", border: "rgba(124,58,237,0.25)", action: () => setActiveTab("money") },
                     { icon: "🤝", label: "Ajo Groups", desc: "Save with your community", color: "rgba(255,165,0,0.1)", border: "rgba(255,165,0,0.2)", action: () => setActiveTab("community") },
                     { icon: "🧾", label: "Split Bills", desc: "Share expenses easily", color: "rgba(255,255,255,0.05)", border: "rgba(255,255,255,0.1)", action: () => setActiveTab("community") },
-                    { icon: "🎯", label: "Save Goals", desc: "Track your targets", color: "rgba(255,255,255,0.05)", border: "rgba(255,255,255,0.1)", action: () => setActiveTab("settings") },
-                    { icon: "🤖", label: "Zela AI", desc: "Get financial advice", color: "rgba(124,58,237,0.1)", border: "rgba(124,58,237,0.2)", action: () => setActiveTab("ai") },
+                    { icon: "🛡️", label: "Protection", desc: "Family vault and goals", color: "rgba(0,212,170,0.08)", border: "rgba(0,212,170,0.15)", action: () => setActiveTab("protection") },
+                    { icon: "🤖", label: "Zela AI", desc: "Get financial advice", color: "rgba(124,58,237,0.1)", border: "rgba(124,58,237,0.2)", action: () => setShowAI(true) },
                   ].map((a, i) => (
                     <button key={i} onClick={a.action} style={{ background: a.color, border: "1px solid " + a.border, borderRadius: 14, padding: "16px 14px", color: "white", cursor: "pointer", textAlign: "left" }}>
                       <div style={{ fontSize: 24, marginBottom: 8 }}>{a.icon}</div>
@@ -566,13 +566,16 @@ export default function ZelaApp() {
                 <ReferralSystem />
               </div>
             )}
-            {activeTab === "ai" && (
+            {activeTab === "protection" && (
               <div>
-                <p style={{ fontSize: 18, fontWeight: 700, margin: "0 0 16px", letterSpacing: "-0.3px" }}>Zela AI</p>
-                <ZelaAI ngnRate={ngnRate} usdcBalance={usdcBalance} vaultBalance={totalDeposited} />
+                <p style={{ fontSize: 18, fontWeight: 700, margin: "0 0 4px", letterSpacing: "-0.3px" }}>Protection</p>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: "0 0 16px" }}>Your money protected from inflation, loss, and death.</p>
+                <FamilyVault ngnRate={ngnRate} totalDeposited={totalDeposited} />
+                <SavingsGoals vaultBalance={totalDeposited} ngnRate={ngnRate} />
+                <InflationTracker ngnRate={ngnRate} totalDeposited={totalDeposited} />
+                <ZelaScore totalDeposited={totalDeposited} depositCount={depositCount} streak={streak} ngnRate={ngnRate} />
               </div>
             )}
-
             {activeTab === "settings" && (
   <Settings ngnRate={ngnRate} />
 )}
