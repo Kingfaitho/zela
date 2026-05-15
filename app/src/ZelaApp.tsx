@@ -589,6 +589,26 @@ export default function ZelaApp() {
         )}
       </div>
 
+      {authenticated && showAI && (
+        <div style={{ position: "fixed", bottom: 80, right: 12, left: 12, maxWidth: 480, margin: "0 auto", zIndex: 200, borderRadius: 20, background: "rgba(13,18,32,0.98)", border: "1px solid rgba(124,58,237,0.3)", padding: 16, boxShadow: "0 20px 60px rgba(0,0,0,0.6)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg, #00d4aa, #7c3aed)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800, color: "white" }}>Z</div>
+              <p style={{ fontWeight: 700, margin: 0, fontSize: 15, color: "white" }}>Zela AI</p>
+            </div>
+            <button onClick={() => setShowAI(false)} style={{ background: "rgba(255,255,255,0.08)", border: "none", borderRadius: 8, color: "white", fontSize: 18, cursor: "pointer", padding: "2px 10px", lineHeight: 1 }}>x</button>
+          </div>
+          <ZelaAI ngnRate={ngnRate} usdcBalance={usdcBalance} vaultBalance={totalDeposited} />
+        </div>
+      )}
+
+      {authenticated && (
+        <button id="zela-ai-floating" onClick={() => setShowAI(!showAI)}
+          style={{ position: "fixed", bottom: 90, right: 20, width: 50, height: 50, borderRadius: "50%", background: "linear-gradient(135deg, #7c3aed, #00d4aa)", border: "none", color: "white", fontSize: 22, cursor: "pointer", zIndex: 300, boxShadow: "0 4px 20px rgba(124,58,237,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          🤖
+        </button>
+      )}
+
       {authenticated && (
         <div style={{ position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: 480, background: "rgba(6,6,14,0.97)", backdropFilter: "blur(24px)", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", padding: "10px 0 24px", zIndex: 100, boxSizing: "border-box" as any }}>
           {tabs.map(tab => (

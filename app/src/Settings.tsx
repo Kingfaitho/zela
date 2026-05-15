@@ -17,8 +17,10 @@ export default function Settings({ ngnRate }: SettingsProps) {
   const [saved, setSaved] = useState("");
 
   const userEmail = user?.email?.address || user?.phone?.number || "";
-  const solanaWallet = wallets?.find(w => w.address && !w.address.startsWith("0x") && w.address.length >= 32);
-  const walletAddress = solanaWallet?.address || "";
+  const solanaWallet = wallets?.find(w => w.address && !w.address.startsWith("0x") && w.address.length >= 32)
+    || wallets?.find(w => w.address && w.type === "solana")
+    || wallets?.find(w => w.address && w.walletClientType === "privy");
+  const walletAddress = solanaWallet?.address || wallets?.find(w => w.address)?.address || "";
 
   const saveUsername = () => {
     if (!tempUsername.trim()) return;
@@ -145,7 +147,16 @@ export default function Settings({ ngnRate }: SettingsProps) {
                 </div>
               </div>
             ) : (
-              <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13 }}>Wallet loading...</p>
+              <div>
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, marginBottom: 8 }}>
+                  {wallets && wallets.length > 0 ? "Detecting Solana wallet..." : "Creating your wallet..."}
+                </p>
+                {wallets && wallets.map((w, i) => (
+                  <p key={i} style={{ color: "rgba(255,255,255,0.3)", fontSize: 11, fontFamily: "monospace", wordBreak: "break-all", marginBottom: 4 }}>
+                    Wallet {i+1}: {w.address?.slice(0,20)}...
+                  </p>
+                ))}
+              </div>
             )}
           </div>
 
