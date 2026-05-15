@@ -559,14 +559,13 @@ export default function ZelaApp() {
 
             {activeTab === "community" && (
               <div>
-                <p style={{ fontSize: 18, fontWeight: 700, margin: "0 0 4px", letterSpacing: "-0.3px" }}>Save & Grow</p>
-                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: "0 0 16px" }}>Set goals. Track progress. Earn rewards for saving daily.</p>
-                <FamilyVault ngnRate={ngnRate} totalDeposited={totalDeposited} />
-                <SavingsGoals vaultBalance={totalDeposited} ngnRate={ngnRate} />
+                <p style={{ fontSize: 18, fontWeight: 700, margin: "0 0 4px", letterSpacing: "-0.3px" }}>Community</p>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: "0 0 16px" }}>Save together, split bills, grow as a group.</p>
+                <AjoFeature />
+                <ZelaSplit ngnRate={ngnRate} />
                 <ReferralSystem />
               </div>
             )}
-
             {activeTab === "ai" && (
               <div>
                 <p style={{ fontSize: 18, fontWeight: 700, margin: "0 0 16px", letterSpacing: "-0.3px" }}>Zela AI</p>
