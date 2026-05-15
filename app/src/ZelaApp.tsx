@@ -49,7 +49,7 @@ export default function ZelaApp() {
     return !localStorage.getItem("zela_onboarded");
   });
 
-  const wallet = wallets?.[0];
+  const wallet = wallets?.find(w => w.address && !w.address.startsWith("0x")) || wallets?.[0];
   const publicKey = (() => {
     try {
       return wallet?.address ? new PublicKey(wallet.address) : null;
@@ -557,7 +557,7 @@ export default function ZelaApp() {
               </div>
             )}
 
-            {activeTab === "save" && (
+            {activeTab === "community" && (
               <div>
                 <p style={{ fontSize: 18, fontWeight: 700, margin: "0 0 4px", letterSpacing: "-0.3px" }}>Save & Grow</p>
                 <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: "0 0 16px" }}>Set goals. Track progress. Earn rewards for saving daily.</p>
