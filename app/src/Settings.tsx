@@ -3,9 +3,11 @@ import { usePrivy, useWallets } from "@privy-io/react-auth";
 
 interface SettingsProps {
   ngnRate: number;
+  darkMode: boolean;
+  setDarkMode: (v: boolean) => void;
 }
 
-export default function Settings({ ngnRate }: SettingsProps) {
+export default function Settings({ ngnRate, darkMode, setDarkMode }: SettingsProps) {
   const { user, logout } = usePrivy();
   const { wallets } = useWallets();
   const [activeSection, setActiveSection] = useState("profile");
@@ -18,7 +20,6 @@ export default function Settings({ ngnRate }: SettingsProps) {
 
   const userEmail = user?.email?.address || user?.phone?.number || "";
   const solanaWallet = wallets?.find(w => w.address && !w.address.startsWith("0x") && w.address.length >= 32)
-    || wallets?.find(w => w.address && w.type === "solana")
     || wallets?.find(w => w.address && w.walletClientType === "privy");
   const walletAddress = solanaWallet?.address || wallets?.find(w => w.address)?.address || "";
 
@@ -164,10 +165,16 @@ export default function Settings({ ngnRate }: SettingsProps) {
             <p style={{ fontWeight: 600, fontSize: 14, margin: "0 0 4px" }}>Connect External Wallet</p>
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", margin: "0 0 14px", lineHeight: 1.5 }}>Already have USDC in Phantom or another Solana wallet? Connect it to use with Zela.</p>
             <div style={{ display: "flex", gap: 8 }}>
-              {["Phantom", "Solflare", "Backpack"].map(w => (
-                <button key={w} style={{ flex: 1, padding: "10px 6px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "rgba(255,255,255,0.5)", fontSize: 12, cursor: "pointer" }}>
-                  {w}
-                </button>
+              {[
+                { name: "Phantom", url: "https://phantom.app", color: "rgba(147,85,234,0.2)", border: "rgba(147,85,234,0.3)", icon: "👻" },
+                { name: "Solflare", url: "https://solflare.com", color: "rgba(255,165,0,0.1)", border: "rgba(255,165,0,0.2)", icon: "🔥" },
+                { name: "Backpack", url: "https://backpack.app", color: "rgba(0,212,170,0.1)", border: "rgba(0,212,170,0.2)", icon: "🎒" },
+              ].map(w => (
+                <a key={w.name} href={w.url} target="_blank" rel="noreferrer"
+                  style={{ flex: 1, padding: "12px 6px", background: w.color, border: "1px solid " + w.border, borderRadius: 10, color: "white", fontSize: 12, cursor: "pointer", textAlign: "center", textDecoration: "none", display: "block" }}>
+                  <div style={{ fontSize: 18, marginBottom: 4 }}>{w.icon}</div>
+                  <p style={{ margin: 0, fontWeight: 600 }}>{w.name}</p>
+                </a>
               ))}
             </div>
           </div>

@@ -46,6 +46,7 @@ export default function ZelaApp() {
   const [streak, setStreak] = useState(0);
   const [txHistory, setTxHistory] = useState<any[]>([]);
   const [showAI, setShowAI] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return !localStorage.getItem("zela_onboarded");
   });
@@ -256,7 +257,7 @@ export default function ZelaApp() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg, #080810 0%, #0d1220 60%, #0a1628 100%)", color: "white", fontFamily: "'Inter', -apple-system, sans-serif", width: "100%", maxWidth: 480, margin: "0 auto", position: "relative", paddingBottom: 90, boxSizing: "border-box" as any }}>
+    <div style={{ minHeight: "100vh", background: darkMode ? "linear-gradient(160deg, #080810 0%, #0d1220 60%, #0a1628 100%)" : "linear-gradient(160deg, #f0f4ff 0%, #e8eef8 60%, #f5f0ff 100%)", color: darkMode ? "white" : "#0d1220", fontFamily: "'Inter', -apple-system, sans-serif", width: "100%", maxWidth: 480, margin: "0 auto", position: "relative", paddingBottom: 90, boxSizing: "border-box" as any }}>
 
       {/* Onboarding Overlay */}
       {showOnboarding && authenticated && (
@@ -577,7 +578,7 @@ export default function ZelaApp() {
               </div>
             )}
             {activeTab === "settings" && (
-  <Settings ngnRate={ngnRate} />
+  <Settings ngnRate={ngnRate} darkMode={darkMode} setDarkMode={setDarkMode} />
 )}
 
             {status && (
@@ -604,8 +605,9 @@ export default function ZelaApp() {
 
       {authenticated && (
         <button id="zela-ai-floating" onClick={() => setShowAI(!showAI)}
-          style={{ position: "fixed", bottom: 90, right: 20, width: 50, height: 50, borderRadius: "50%", background: "linear-gradient(135deg, #7c3aed, #00d4aa)", border: "none", color: "white", fontSize: 22, cursor: "pointer", zIndex: 300, boxShadow: "0 4px 20px rgba(124,58,237,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          🤖
+          style={{ position: "fixed", bottom: 90, right: 16, background: "linear-gradient(135deg, #7c3aed, #00d4aa)", border: "none", borderRadius: 24, color: "white", cursor: "pointer", zIndex: 300, boxShadow: "0 4px 20px rgba(124,58,237,0.5)", display: "flex", alignItems: "center", gap: 8, padding: "10px 16px" }}>
+          <span style={{ fontSize: 18 }}>🤖</span>
+          <span style={{ fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" }}>Ask Zela AI</span>
         </button>
       )}
 
