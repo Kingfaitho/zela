@@ -46,7 +46,7 @@ export default function ZelaAI({ ngnRate, usdcBalance, vaultBalance }: ZelaAIPro
           "X-Title": "Zela",
         },
         body: JSON.stringify({
-          model: "mistralai/mistral-7b-instruct:free",
+          model: "openai/gpt-oss-120b:free",
           messages: [
             { role: "system", content: systemPrompt },
             ...newMessages.map(m => ({ role: m.role, content: m.content })),
