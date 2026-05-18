@@ -134,10 +134,18 @@ export default function FamilyVault({ ngnRate, totalDeposited }: FamilyVaultProp
 
             <div style={{ marginBottom: 20 }}>
               <p style={{ margin: "0 0 8px", fontSize: 13, color: "rgba(255,255,255,0.6)", fontWeight: 500 }}>Release after how many days without check-in?</p>
-              <div style={{ display: "flex", gap: 8 }}>
-                {["30", "60", "90", "180"].map(d => (
-                  <button key={d} onClick={() => setInterval(d)} style={{ flex: 1, padding: "10px 6px", background: interval === d ? "rgba(0,212,170,0.15)" : "rgba(255,255,255,0.04)", border: "1px solid " + (interval === d ? "rgba(0,212,170,0.3)" : "rgba(255,255,255,0.08)"), borderRadius: 10, color: interval === d ? "#00d4aa" : "rgba(255,255,255,0.5)", cursor: "pointer", fontSize: 13, fontWeight: interval === d ? 700 : 400 }}>
-                    {d}d
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {[
+                  { value: "90", label: "90 days" },
+                  { value: "180", label: "6 months" },
+                  { value: "365", label: "1 year" },
+                  { value: "730", label: "2 years" },
+                  { value: "1825", label: "5 years" },
+                  { value: "3650", label: "10 years" },
+                ].map(d => (
+                  <button key={d.value} onClick={() => setInterval(d.value)}
+                    style={{ flex: "1 1 calc(33% - 8px)", padding: "10px 6px", background: interval === d.value ? "rgba(0,212,170,0.15)" : "rgba(255,255,255,0.04)", border: "1px solid " + (interval === d.value ? "rgba(0,212,170,0.3)" : "rgba(255,255,255,0.08)"), borderRadius: 10, color: interval === d.value ? "#00d4aa" : "rgba(255,255,255,0.5)", cursor: "pointer", fontSize: 12, fontWeight: interval === d.value ? 700 : 400, textAlign: "center" as any }}>
+                    {d.label}
                   </button>
                 ))}
               </div>
